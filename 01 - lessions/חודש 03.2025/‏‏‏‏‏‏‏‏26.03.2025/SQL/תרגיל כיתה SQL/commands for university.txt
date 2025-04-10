@@ -1,0 +1,9 @@
+SELECT * from universities 
+
+SELECT universities.name , universities.price FROM universities
+
+SELECT * from universities where value_rank < 3
+
+SELECT * from universities where price > 5000
+
+SELECT * from universities where value_rank = 5

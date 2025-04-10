@@ -1,0 +1,2 @@
+INSERT INTO cities (city_id,name) VALUES  (5,'jerusalem')
+INSERT INTO cities (name) VALUES  ('jerusalem') 

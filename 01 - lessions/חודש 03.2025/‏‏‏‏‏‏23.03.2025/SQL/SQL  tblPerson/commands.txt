@@ -1,0 +1,12 @@
+
+INSERT INTO persons (fname,lname,age,salary) VALUES ('dani', 'grell',20,3000);
+INSERT INTO persons (fname,lname,age,salary) VALUES ('david','or',25,7500);
+INSERT INTO persons (fname,lname,age,salary) VALUES ('shukiz', 'brill',40,12000);
+INSERT INTO persons (fname,lname,age,salary) VALUES ('dana', 'azik',35,18000);
+
+execute SQL
+SELECT fname,lname,age,salary
+from persons 
+where salary > 3000 
+where age > 30 and salary >7000
+SELECT fname , lname, salary from persons

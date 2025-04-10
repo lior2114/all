@@ -1,0 +1,4 @@
+color: red
+length: 20
+light_power: 50%
+battery_counter: 2

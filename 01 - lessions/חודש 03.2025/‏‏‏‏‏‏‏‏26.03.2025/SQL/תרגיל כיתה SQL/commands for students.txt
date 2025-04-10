@@ -1,0 +1,13 @@
+SELECT * from students WHERE average > 70 
+
+SELECT * from students WHERE lname LIKE 'A%'
+
+SELECT students.fname , universities.name from students
+inner join universities on students.unversity_id = universities.university_id
+where students.unversity_id = 2;
+
+SELECT students.fname , students.average from students
+
+SELECT * FROM students
+WHERE average >= 80 and average < 90
+

@@ -1,0 +1,10 @@
+-- INSERT INTO workers (first_name,last_name,email,phone,city_id,salary) values ('r','r','df@gmfעail.com','0538869986',3,2000)
+-- SELECT * from workers WHERE salary > 500 order by first_name DESC מסדר את המחירים מהגבוה לנמוך 
+-- SELECT * from workers WHERE salary > 500 order by first_name DESC
+-- UPDATE workers set salary = 5000 where worked_id = 4 
+-- UPDATE workers set salary = 6000 ,worked_id = 3 where worked_id = 8
+-- DELETE from workers where salary > 2000
+
+
+SELECT workers.first_name, cities.name from workers
+inner join cities on workers.city_id = cities.city_id

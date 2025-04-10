@@ -1,0 +1,3 @@
+SELECT * FROM libraries
+SELECT * FROM libraries where city = 'New York'
+SELECT * FROM libraries WHERE open_hours = '08:00-20:00'

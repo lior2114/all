@@ -1,0 +1,4 @@
+manufacturer: lol1
+model: my1
+color: yellow
+volume: 120

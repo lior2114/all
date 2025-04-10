@@ -1,0 +1,4 @@
+manufacturer: avater
+model: kora
+color: red
+volume: 100

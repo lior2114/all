@@ -1,0 +1,13 @@
+INSERT INTO Books (title,author,year_published,price) VALUES ('The Silent Forest','John Green',2010,80);
+INSERT INTO Books (title,author,year_published,price) VALUES ('Journey to the Stars','Sarah Bright',2020,120);
+INSERT INTO Books (title,author,year_published,price) VALUES ('Deep Ocean','Michael Stone',2005	,60);
+INSERT INTO Books (title,author,year_published,price) VALUES ('Ancient Secrets','Laura Knight',1999	,150);
+INSERT INTO Books (title,author,year_published,price) VALUES ('Future Code','Dan Hacker',2023,200);
+
+executed SQL commands: 
+א) SELECT * FROM books 
+WHERE price > 100;
+
+ב) SEECT title, price from Books where year_published > 2010
+
+ג)SELECT * FROM books WHERE year_published <2010 OR price < 100;

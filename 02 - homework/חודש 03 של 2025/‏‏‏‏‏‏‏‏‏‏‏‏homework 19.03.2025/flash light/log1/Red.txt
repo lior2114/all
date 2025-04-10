@@ -1,0 +1,1 @@
+name:log1, color:Red, length:10, light power: 100, batterys:1

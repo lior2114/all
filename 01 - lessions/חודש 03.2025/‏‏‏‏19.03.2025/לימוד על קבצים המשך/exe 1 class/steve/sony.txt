@@ -1,0 +1,1 @@
+ manufactor:steve, model:sony, color:blue, volume:80

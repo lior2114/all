@@ -1,0 +1,1 @@
+name:log2, color:Blue, length:12, light power: 150, batterys:0

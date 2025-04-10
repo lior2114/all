@@ -1,0 +1,6 @@
+SELECT * FROM Books where genre = 'Classic'
+SELECT title from books where author like 'H%';
+SELECT Books.title , libraries.name from Books
+inner JOIN libraries on Books.library_id = libraries.library_id
+SELECT * FROM Books WHERE library_id = 2
+SELECT * FROM Books where genre = 'Classic' or genre = 'Fantasy'

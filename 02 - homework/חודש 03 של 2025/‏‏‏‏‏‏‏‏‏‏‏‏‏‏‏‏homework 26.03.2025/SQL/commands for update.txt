@@ -1,0 +1,13 @@
+SELECT * from Books
+
+UPDATE Books
+SET author = 'pivot'
+WHERE books_id = 3
+
+UPDATE libraries
+SET name = 'Chicago central library'
+where name = 'Riverside Library'
+
+UPDATE Books 
+set genre = 'Thriller'
+where genre = 'Classic'

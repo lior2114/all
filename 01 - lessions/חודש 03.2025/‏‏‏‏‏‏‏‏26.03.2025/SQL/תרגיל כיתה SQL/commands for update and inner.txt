@@ -1,0 +1,14 @@
+UPDATE universities 
+set name = 'Bar Ilan University'
+WHERE university_id = 1 
+
+UPDATE universities
+set price = 9000 
+where value_rank = 5 
+
+SELECT students.fname, universities.name from students
+inner join universities on students.unversity_id = universities.university_id
+
+SELECT students.fname,students.average, universities.name from students
+inner join universities on students.unversity_id = universities.university_id
+where students.average > 80

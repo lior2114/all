@@ -1,0 +1,1 @@
+ manufactor:tony, model:jbl, color:red, volume:100
