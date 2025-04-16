@@ -1,7 +1,7 @@
 echo "# all" >> README.md
 git init
 git add README.md
-git commit -m "first commit"
+git commit -m "allrar"
 git branch -M main
 git remote add origin https://github.com/lior2114/all.git
 git push -u origin main
@@ -11,3 +11,24 @@ git push -u origin main
 git remote add origin https://github.com/lior2114/all.git
 git branch -M main
 git push -u origin main
+
+
+
+
+כדי לעדכן את כל הקבצים (להוסיף את כל הקבצים הלא מעודכנים ל-stage), תוכל להשתמש בפקודה הבאה:
+git add .
+
+הסבר:
+הנקודה (.) מסמלת "כל הקבצים בתיקייה הנוכחית ובתיקיות המשנה".
+פקודה זו תוסיף את כל הקבצים הלא מעודכנים (Untracked) ואת כל השינויים בקבצים שכבר נמצאים במעקב (Tracked) ל-stage.
+לאחר מכן:
+בדוק את הסטטוס של Git:
+git status
+
+בצע commit לשינויים:
+git commit -m "עדכון כל הקבצים"
+
+דחוף את השינויים ל-remote repository (GitHub):
+git push
+
+לאחר השלבים הללו, כל הקבצים והשינויים יועלו למאגר המרוחק שלך ב-GitHub.
