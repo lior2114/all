@@ -14,7 +14,7 @@ class Buttons:
     root.geometry("300x200")
 
     # יצירת כפתורים
-    button1 = tk.Button(root, text="הפעל סקריפט 1", command=lambda: run_script("script1.py"))
+    button1 = tk.Button(root, text="הפעל סקריפט 1", command=lambda: run_script("testing.py"))
     button2 = tk.Button(root, text="הפעל סקריפט 2", command=lambda: run_script("script2.py"))
     button3 = tk.Button(root, text="הפעל סקריפט 3", command=lambda: run_script("script3.py"))
     button4 = tk.Button(root, text = "stop",width=10, command=root.destroy)
