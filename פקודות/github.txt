@@ -1,9 +1,9 @@
 echo "# all" >> README.md
 git init
 git add README.md
-git commit -m "צד שרת עם 3 תיקיות"
+git commit -m "allrar"
 git branch -M main
-git remote add origin https://github.com/lior2114/server_start_with_3_files
+git remote add origin https://github.com/lior2114/all
 git push -u origin main
 
 
@@ -24,16 +24,20 @@ git add .
 לאחר מכן:
 בדוק את הסטטוס של Git:
 git status
-
 בצע commit לשינויים:
 git commit -m "עדכון כל הקבצים"
-
 דחוף את השינויים ל-remote repository (GitHub):
 git push
-
 לאחר השלבים הללו, כל הקבצים והשינויים יועלו למאגר המרוחק שלך ב-GitHub.
+
+
 אם אין גישה לשרת המרוחק להריץ את הפקודה הבאה
 git pull origin main --rebase
 
 אם רוצים להוריד את הנתונים מכתובת מסויימת בגיט האב רושמים 
 git clone https://github.com/lior2114/server_start_with_3_files והקישור אחרי ה - clone 
+
+שמירת שינויים שנעשו 
+git remote add origin https://github.com/lior2114/all
+git add .
+git commit -m "20.04.2025"
