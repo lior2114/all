@@ -41,3 +41,4 @@ git clone https://github.com/lior2114/server_start_with_3_files והקישור �
 git remote add origin https://github.com/lior2114/all
 git add .
 git commit -m "20.04.2025"
+git push
