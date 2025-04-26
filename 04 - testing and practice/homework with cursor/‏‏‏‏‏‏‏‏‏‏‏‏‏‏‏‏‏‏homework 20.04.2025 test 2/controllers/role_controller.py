@@ -3,7 +3,7 @@ from models.role_model import Tables_Roles as T
 
 class Controller_Roles:
 
-
+ 
 #יצירת רול
     @staticmethod
     def create_role():
