@@ -99,7 +99,7 @@ class WorkersModel:
             
             pair = ""
             for key,value in data.items():
-                pair += key +"="+ "'"+ value + "'" + ","
+                pair += key +"="+ "'"+ value + "'" + "," # כי באסקיול מציגים ככה את האפדייט כשיש משתנה שאנחנו רוצים לשנות עם שווה באמצע 
             pair = pair [:-1] # הורדת הפסיק בשורה האחרונה שלא יהיה בעיה 
             sql = f'''
                 update workers
@@ -123,5 +123,34 @@ class WorkersModel:
             sql = "delete from workers where worker_id = ?"
             cursor.execute(sql,(worker_id,))
             connection.commit()
+            cursor.close()
             return True
 
+
+    @staticmethod
+    def show_description_by_worker_id(worker_id):
+        with WorkersModel.get_db_connection() as connection:
+            cursor = connection.cursor()
+            sql = "select * from workers where worker_id = ?"
+            cursor.execute(sql,(worker_id ,))
+            if not cursor.fetchone():
+                cursor.close()
+                return {"Error":"ID not found"}
+            sql = '''select worker_id, first_name, last_name, salary, role_description 
+                     from workers 
+                     inner join Roles on workers.role_id = Roles.role_id
+                     where worker_id = ?
+                    '''
+            cursor.execute(sql,(worker_id ,))
+            rows = cursor.fetchall()
+            cursor.close()
+            return [
+                {
+                    "worker_id":row[0],
+                    "first_name":row[1],
+                    "last_name":row[2],
+                    "salary":row[3],
+                    "role_description":row[4]
+                }
+                for row in rows
+            ]

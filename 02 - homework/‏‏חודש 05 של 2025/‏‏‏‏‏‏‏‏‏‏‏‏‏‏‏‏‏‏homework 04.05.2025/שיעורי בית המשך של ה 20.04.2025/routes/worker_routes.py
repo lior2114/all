@@ -23,3 +23,8 @@ def update_worker(worker_id):
 def delete_worker_by_id(worker_id):
   return WC.delete_worker(worker_id)
 
+@worker_bp.route("/worker/des/<int:worker_id>", methods = ["GET"])
+def show_description_by_worker_id(worker_id):
+  return WC.show_description_in_workers(worker_id)
+
+

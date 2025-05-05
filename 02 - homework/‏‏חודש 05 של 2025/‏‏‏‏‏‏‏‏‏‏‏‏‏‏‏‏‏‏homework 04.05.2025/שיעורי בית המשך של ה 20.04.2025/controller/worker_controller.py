@@ -42,6 +42,13 @@ class WorkersControllers:
         if not result:
             return jsonify({"Error":f"worker not found with id {worker_id}"}),400
         return jsonify({"message":f"worker: {worker_id} has been deleted"}),201
+    
+    @staticmethod
+    def show_description_in_workers(worker_id):
+        result = W.show_description_by_worker_id(worker_id)
+        return jsonify(result),201
+        
+
         
         
         
