@@ -1,0 +1,45 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    background-image: url("../images/green.png"); /* עדכון לתמונת הרקע האמיתית */
+    background-size: cover; /* ודא שהתמונה מכסה את כל הרקע */
+    background-position: center; /* מרכז את התמונה */
+    background-repeat: no-repeat; /* מנע חזרה על התמונה */
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    animation: colorchange 5s infinite alternate;
+}
+
+p1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: colorchange 5s infinite alternate;
+}
+
+@keyframes colorchange {
+    0% {color: red;}
+    10% {color: orange;}
+    20% {color: yellow;}
+    30% {color: green;}
+    40% {color: blue;}
+    50% {color: indigo;}
+    60% {color: violet;}
+    70% {color: pink;}
+    80% {color: brown;}
+    90% {color: teal;}
+    100% {color: lime;}
+}
