@@ -27,6 +27,7 @@ class Users_Model:
             connection.commit()
             cursor.close()
 
+    @staticmethod
     def create_user(first_name, last_name, user_email, user_password):
         with Users_Model.get_db_connection() as connection:
             cursor = connection.cursor()
@@ -45,7 +46,7 @@ class Users_Model:
             }
 
     @staticmethod
-    def get_all():
+    def get_all_users():
         with Users_Model.get_db_connection() as connection:
             cursor = connection.cursor()
             sql = "select * from users"
@@ -89,7 +90,7 @@ class Users_Model:
                 }
         
     @staticmethod
-    def update_user(user_id, data):
+    def update_user_by_id(user_id, data):
         with Users_Model.get_db_connection() as connection:
             cursor = connection.cursor()
             sql = "select * from users where user_id =?"
@@ -125,3 +126,16 @@ class Users_Model:
             cursor.execute(sql,(user_id,))
             connection.commit()
             cursor.close()
+            return {"Message":"User deleted successfully"}
+
+    @staticmethod
+    def if_mail_exists(user_email):
+        with Users_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            sql = "select user_email from users where user_email =?"
+            cursor.execute(sql,(user_email ,))
+            exists = cursor.fetchone()
+            cursor.close()
+            if not exists:
+                return True
+            return False

@@ -4,7 +4,7 @@ path_name = "./SQL/Mydb.db"
 if not os.path.exists("./SQL"):
     os.makedirs("./SQL")
 
-class Role_Model:
+class Role_Model: 
 
     @staticmethod
     def get_db_connection():
@@ -39,7 +39,7 @@ class Role_Model:
             ]
 
     @staticmethod
-    def get_all_role():
+    def get_all_roles():
         with Role_Model.get_db_connection() as connection:
             cursor = connection.cursor()
             sql = "select * from roles"
@@ -77,7 +77,7 @@ class Role_Model:
             ]
         
     @staticmethod
-    def update_role(role_id, role_name):
+    def update_role_by_id(role_id, role_name):
         with Role_Model.get_db_connection() as connection:
             cursor = connection.cursor()
             sql = "select * from roles where role_id =?"
@@ -107,4 +107,4 @@ class Role_Model:
             cursor.execute(sql,(role_id,))
             connection.commit()
             cursor.close()
-    
+            return ({"Message":"Role has been succefully deleted"})
