@@ -43,13 +43,17 @@ class Users_Controller:
         for value in data:
             if value not in lis_requimints:
                 return jsonify ({"Error":"invalid key"}), 400
-        if "user_password" in data and len(data["user_password"].strip()) < 4:
+        if "user_password" in data and len(data["user_password"].strip()) < 4: #סטריפ מוריד רווחים 
             return jsonify ({"Error":"password need to be more then 4 values"}), 400
         if "user_email" in data:
             if not re.match(r"[^@]+@[^@]+\.[^@]+", data["user_email"]): #תנאי בדיקת מיילים
                 return jsonify({"Error": "Invalid email format"}), 400
             if not U.if_mail_exists(data["user_email"]):
                 return jsonify ({"Error":"Email already exists"}), 400
+        if "first_name" in data and (not str(data["first_name"]).isalpha()):
+            return jsonify({"Error": "first_name must contain only letters"}), 400
+        if "last_name" in data and (not str(data["last_name"]).isalpha()):
+            return jsonify({"Error": "last_name must contain only letters"}), 400
         result = U.update_user_by_id(user_id, data)
         if result is None:
             return jsonify({"Error": "user not found"}), 400

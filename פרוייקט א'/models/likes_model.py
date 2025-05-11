@@ -23,3 +23,21 @@ class Likes_Model:
             cursor.execute(sql)
             connection.commit()
             cursor.close()
+
+    @staticmethod
+    def like_vacation(user_id, vacation_id):
+        with Likes_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            sql = "INSERT INTO likes (user_id, vacation_id) VALUES (?, ?)"
+            cursor.execute(sql, (user_id, vacation_id))
+            connection.commit()
+            cursor.close()
+
+    @staticmethod
+    def unlike_vacation(user_id, vacation_id):
+        with Likes_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            sql = "DELETE FROM likes WHERE user_id = ? AND vacation_id = ?"
+            cursor.execute(sql, (user_id, vacation_id))
+            connection.commit()
+            cursor.close()

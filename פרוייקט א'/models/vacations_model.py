@@ -1,5 +1,7 @@
 import sqlite3
 import os
+from datetime import datetime
+
 path_name = "./SQL/Mydb.db"
 if not os.path.exists("./SQL"):
     os.makedirs("./SQL")
@@ -29,7 +31,7 @@ class Vacations_Model:
             cursor.close()
 
     @staticmethod
-    def create_vacations(country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name):
+    def create_vacation(country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name ):
         with Vacations_Model.get_db_connection() as connection:
             cursor = connection.cursor()
             sql = "insert into vacations (country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name) values (?, ?, ?, ?, ?, ?)"
@@ -48,10 +50,13 @@ class Vacations_Model:
             }
 
     @staticmethod
-    def get_all():
+    def get_all_vacations():
         with Vacations_Model.get_db_connection() as connection:
             cursor = connection.cursor()
-            sql = "select * from vacations"
+            sql = '''select vacations.vacation_id, countries.country_name, vacations.vacation_description, vacations.vacation_start, vacations.vacation_ends, vacations.vacation_price, vacations.vacation_file_name
+            from vacations
+            inner join countries on vacations.country_id = countries.country_id
+            order by vacations.vacation_start asc'''
             cursor.execute(sql)
             vacations = cursor.fetchall()
             if not vacations:
@@ -61,7 +66,7 @@ class Vacations_Model:
             return [
                 {
                     "vacation_id":row[0],
-                    "country_id":row[1],
+                    "country_name":row[1],
                     "vacation_description":row[2],
                     "vacation_start":row[3],
                     "vacation_ends":row[4],
@@ -71,7 +76,7 @@ class Vacations_Model:
                 for row in vacations
             ]
     
-
+# כאן לא השתמשתי בכוונה ב inner join כדי לתת עוד דוגמא שזה יראה גם את הקודים של המדינות
     @staticmethod
     def show_vacation_by_id(vacation_id):
         with Vacations_Model.get_db_connection() as connection:
@@ -94,7 +99,7 @@ class Vacations_Model:
                 }
         
     @staticmethod
-    def update_vacation(vacation_id, data):
+    def update_vacation_by_id(vacation_id, data):
         with Vacations_Model.get_db_connection() as connection:
             cursor = connection.cursor()
             sql = "select * from vacations where vacation_id =?"
@@ -106,6 +111,8 @@ class Vacations_Model:
             
             pair = ""
             for key,value in data.items():
+                if key == "vacation_file_name":
+                    return {"Error":"cannot update file name its a order!"}
                 pair += key + "=" + "'" + value + "'" + ","
             pair = pair[:-1]
             sql = f'''update vacations 
@@ -126,8 +133,27 @@ class Vacations_Model:
             if not vacation:
                 cursor.close()
                 return {"Massages":"No vacations with that ID"}
-            sql = "delete from vacations where vacation_id = ?"
-            cursor.execute(sql,(vacation_id,))
+            
+            cursor.execute("DELETE FROM likes WHERE vacation_id = ?", (vacation_id,))
+            cursor.execute("DELETE FROM vacations WHERE vacation_id = ?" ,(vacation_id,))
             connection.commit()
             cursor.close()
             return {"Message":f"vacation_id {vacation_id} has been deleted successfully"}
+
+    @staticmethod
+    def check_dates(data):
+        with Vacations_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            if data["vacation_start"]:
+                sql = "select vacation_start from vacations where vacation_ends =?" 
+                cursor.execute(sql, (data["vacation_ends"],))
+            if data["vacation_ends"]:
+                sql = "select vacation_ends from vacations where vacation_start =?" 
+                cursor.execute(sql, (data["vacation_start"],))
+            start_date = datetime.strptime(data["vacation_start"], "%Y-%m-%d")
+            end_date = datetime.strptime(data["vacation_ends"], "%Y-%m-%d")
+            if start_date > end_date:
+                cursor.close()
+                return False
+            cursor.close()
+            return True

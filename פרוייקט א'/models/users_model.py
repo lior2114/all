@@ -101,7 +101,7 @@ class Users_Model:
                 return {"Massages":"No users with that ID"}
             
             pair = ""
-            for key,value in data:
+            for key,value in data.items():
                 pair += key + "=" + "'" + value + "'" + ","
             pair = pair [:-1]
             sql = f'''update users 
