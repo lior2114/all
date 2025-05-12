@@ -55,18 +55,13 @@ class Vacations_Controller:
         if "vacation_price" in data and data["vacation_price"] > 10000 or "vacation_price" in data and data["vacation_price"] < 0:
             return jsonify({"Error": "vacation_price cant be low then 0 or high then 10000"}), 400
         
-        if "vacation_start" in data:
-            V.check_dates(data["vacation_start"])
-            if True:
-                result = V.update_vacation_by_id(vacation_id, data)
-                return jsonify(result)
+        if "vacation_start" in data and data["vacation_start"]:
+            if not V.check_datesv2(vacation_id, data):
+                return jsonify({"Error":"start date are bigger then the end date"})
+        if "vacation_ends" in data and data["vacation_ends"]:
+            if not V.check_datesv2(vacation_id, data):
+                return jsonify({"Error":"end date are lower then the start date"})
             
-        if "vacation_ends" in data:
-            V.check_dates(data["vacation_ends"])
-            if True:
-                result = V.update_vacation_by_id(vacation_id, data)
-                return jsonify(result)
-
         result = V.update_vacation_by_id(vacation_id, data)
         return jsonify(result)
     

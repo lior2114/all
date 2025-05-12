@@ -145,15 +145,50 @@ class Vacations_Model:
         with Vacations_Model.get_db_connection() as connection:
             cursor = connection.cursor()
             if data["vacation_start"]:
-                sql = "select vacation_start from vacations where vacation_ends =?" 
-                cursor.execute(sql, (data["vacation_ends"],))
-            if data["vacation_ends"]:
                 sql = "select vacation_ends from vacations where vacation_start =?" 
                 cursor.execute(sql, (data["vacation_start"],))
-            start_date = datetime.strptime(data["vacation_start"], "%Y-%m-%d")
-            end_date = datetime.strptime(data["vacation_ends"], "%Y-%m-%d")
-            if start_date > end_date:
+                start_date = datetime.strptime(data["vacation_start"], "%Y-%m-%d")
+                end_date = datetime.strptime(data["vacation_ends"], "%Y-%m-%d")
+                if start_date > end_date:
+                    cursor.close()
+                    return False
+                else:
+                    return True
+            if data["vacation_ends"]:
+                sql = "select vacation_start from vacations where vacation_ends =?" 
+                cursor.execute(sql, (data["vacation_ends"],))
+                start_date = datetime.strptime(data["vacation_start"], "%Y-%m-%d")
+                end_date = datetime.strptime(data["vacation_ends"], "%Y-%m-%d")
+                if start_date > end_date:
+                    cursor.close()
+                    return False
                 cursor.close()
-                return False
-            cursor.close()
-            return True
+                return True
+    
+    @staticmethod
+    def check_datesv2(vacation_id,data):
+        with Vacations_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            if data["vacation_start"]:
+                sql = "select vacation_ends from vacations where vacation_id =?" 
+                cursor.execute(sql, (vacation_id,))
+                show_vacation_ends = cursor.fetchone()
+                start_date = datetime.strptime(data["vacation_start"], "%Y-%m-%d")
+                end_date = show_vacation_ends
+                if start_date > end_date:
+                    cursor.close()
+                    return False
+                else:
+                    return True
+            if data["vacation_ends"]:
+                sql = "select vacation_start from vacations where vacation_id =?" 
+                cursor.execute(sql, (vacation_id,))
+                show_vacation_start = cursor.fetchone()
+                start_date = show_vacation_start 
+                end_date = datetime.strptime(data["vacation_ends"], "%Y-%m-%d")
+                if start_date > end_date:
+                    cursor.close()
+                    return False
+                cursor.close()
+                return True
+                
