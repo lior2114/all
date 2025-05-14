@@ -2,7 +2,7 @@ from flask import jsonify, request
 from models.likes_model import Likes_Model as L
 
 class Likes_Controller:
-    def like_vacation():
+    def add_like_to_vacation():
         data = request.get_json()
         if not data:
             return jsonify({"Error": "No data provided or user_id or vacation_id is missing"}), 400

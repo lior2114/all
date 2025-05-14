@@ -32,6 +32,7 @@ class Likes_Model:
             cursor.execute(sql, (user_id, vacation_id))
             connection.commit()
             cursor.close()
+            return {"Message":f"user_id {user_id} has been liked vacation_id {vacation_id} successfully"}
 
     @staticmethod
     def unlike_vacation(user_id, vacation_id):
@@ -41,3 +42,4 @@ class Likes_Model:
             cursor.execute(sql, (user_id, vacation_id))
             connection.commit()
             cursor.close()
+            return {"Message":f"user_id {user_id} has been unliked vacation_id {vacation_id} successfully"}

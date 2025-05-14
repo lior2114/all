@@ -6,7 +6,7 @@ likes_bp = Blueprint("/likes", __name__)
 def add_like_to_vacation():
     return L.add_like_to_vacation()
 
-@likes_bp.route("/likes", methods = ["GET"])
-def get_all_likes():
-    return L.get_all_likes()
+@likes_bp.route("/likes", methods = ["DELETE"])
+def unlike_vacation():
+    return L.unlike_vacation()
 

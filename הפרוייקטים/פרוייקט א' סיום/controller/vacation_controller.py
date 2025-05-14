@@ -30,18 +30,19 @@ class Vacations_Controller:
             vacation_price = data["vacation_price"],
             vacation_file_name = data["vacation_file_name"]
             )
-        return jsonify(result)
+        return jsonify(result), 201
+
     
 
     @staticmethod
     def get_all_vacations():
         result = V.get_all_vacations()
-        return jsonify(result)
+        return jsonify(result),201
     
     @staticmethod
     def show_vacations_by_id(vacation_id):
         result = V.show_vacation_by_id(vacation_id)
-        return jsonify(result)
+        return jsonify(result),201
     
     @staticmethod
     def update_vacation_by_id(vacation_id):
@@ -51,7 +52,11 @@ class Vacations_Controller:
         result = V.update_vacation_by_id(vacation_id, data)
         if "Error" in result:
             return jsonify(result), 400
-        return jsonify(result)
+            
+        if "vacation_price" in data:
+            if float(data["vacation_price"]) > 10000 or float(data["vacation_price"]) < 0: #הופך לפלואט שגם אם המשתמש בטעות יכניס עם גרשיים אז זה יחזיר את זה למספר ויכניס בלי שיקריס את השרת 
+                return jsonify({"Error": "vacation_price cant be lower then 0 or high then 10000"}), 400
+        return jsonify(result), 201
     
     @staticmethod
     def delete_vacation_by_id(vacation_id):

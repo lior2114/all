@@ -35,6 +35,16 @@ class Users_Controller:
         return jsonify(result), 201
     
     @staticmethod
+    def show_user_by_email_and_password():
+        data = request.get_json()
+        if not data:
+            return jsonify ({"Error":"Missing values or data empty"}), 400
+        if "user_email" not in data or "user_password" not in data:
+            return jsonify ({"Error":"Missing values or data empty"}), 400
+        result = U.show_user_by_email_and_password(data["user_email"], data["user_password"])
+        return jsonify(result), 201
+
+    @staticmethod
     def update_user_by_id(user_id):
         data = request.get_json()
         lis_requimints = ["first_name", "last_name", "user_email", "user_password", "role_id"]

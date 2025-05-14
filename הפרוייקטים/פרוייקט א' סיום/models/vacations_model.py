@@ -98,7 +98,7 @@ class Vacations_Model:
                     "vacation_file_name":vacation[6]
                 }
         
-    @staticmethod
+    @staticmethod 
     def update_vacation_by_id(vacation_id, data):
         with Vacations_Model.get_db_connection() as connection:
             cursor = connection.cursor()
@@ -107,7 +107,7 @@ class Vacations_Model:
             vacation = cursor.fetchone()
             if not vacation:
                 cursor.close()
-                return {"Massages":"No vacations with that ID"}
+                return {"Error":"No vacations with that ID"}
             
             if "vacation_start" in data or "vacation_ends" in data:
                 current_start = vacation[3] 
@@ -122,17 +122,16 @@ class Vacations_Model:
                 if start_date > end_date:
                     cursor.close()
                     return {"Error": "Start date cannot be later than end date"}
-            
-            pair = ""
-            for key,value in data.items():
-                if key == "vacation_file_name":
-                    return {"Error":"cannot update file name its a order!"}
-                pair += key + "=" + "'" + value + "'" + ","
+            pair = "" 
+            for key, value in data.items():
+                if isinstance(value, (int, float)):
+                    pair += f"{key}={value}," #הוספה למספרים כמו המחיר שלא מחייב גרשיים 
+                else:
+                    pair += f"{key}='{value}',"
             pair = pair[:-1]
-            sql = f'''update vacations 
-                    set {pair} where vacation_id = ?'''
+            sql = f'''UPDATE vacations SET {pair} WHERE vacation_id = {vacation_id}'''
             
-            cursor.execute(sql,(vacation_id ,))
+            cursor.execute(sql)
             connection.commit()
             cursor.close()
             return {"Message":f"vacation_id {vacation_id} has been updated successfully"}

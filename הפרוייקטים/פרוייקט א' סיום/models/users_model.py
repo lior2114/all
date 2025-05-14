@@ -90,6 +90,26 @@ class Users_Model:
                 }
         
     @staticmethod
+    def show_user_by_email_and_password(user_email, user_password):
+        with Users_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            sql = "select * from users where user_email =? and user_password =?"
+            cursor.execute(sql,(user_email, user_password))
+            user = cursor.fetchone()
+            if not user:
+                cursor.close()
+                return {"Massages":"No users with that email and password"}
+            cursor.close()
+            return {
+                "user_id":user[0],
+                "first_name":user[1],
+                "last_name":user[2],
+                "user_email":user[3],
+                "user_password":user[4],
+                "role_id":user[5]
+            }
+        
+    @staticmethod
     def update_user_by_id(user_id, data):
         with Users_Model.get_db_connection() as connection:
             cursor = connection.cursor()

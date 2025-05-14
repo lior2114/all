@@ -448,41 +448,6 @@
 					"response": []
 				},
 				{
-					"name": "הצגת המשתמש לפי האימייל והסיסמא",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"user_email\":\"user@example.com\",\r\n    \"user_password\":\"user123\"\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://127.0.0.1:5000/users/login",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "5000",
-							"path": [
-								"users",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "עדכון שם ה user לפי ה ID",
 					"request": {
 						"method": "PUT",
@@ -541,41 +506,6 @@
 							"path": [
 								"users",
 								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "הצגת המשתמש לפי האימייל והסיסמא",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"user_email\":\"user@example.com\",\r\n    \"user_password\":\"user123\"\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://127.0.0.1:5000/users/login",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "5000",
-							"path": [
-								"users",
-								"login"
 							]
 						}
 					},
@@ -747,73 +677,6 @@
 								"vacations",
 								"delete",
 								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "LIKES",
-			"item": [
-				{
-					"name": "יצירת לייקים",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"user_id\":\"3\",\r\n    \"vacation_id\": \"3\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://127.0.0.1:5000/likes",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "5000",
-							"path": [
-								"likes"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "מחיקת לייקים",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"user_id\":\"3\",\r\n    \"vacation_id\": \"3\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://127.0.0.1:5000/likes",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "5000",
-							"path": [
-								"likes"
 							]
 						}
 					},

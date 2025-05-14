@@ -11,6 +11,10 @@ def create_user():
 def get_all_users():
     return U.get_all_users()
 
+@users_bp.route("/users/login", methods = ["GET"])
+def show_user_by_email_and_password():
+    return U.show_user_by_email_and_password()
+
 @users_bp.route("/users/<int:user_id>", methods = ["GET"])
 def show_user_by_id(user_id):
     return U.show_user_by_id(user_id)
