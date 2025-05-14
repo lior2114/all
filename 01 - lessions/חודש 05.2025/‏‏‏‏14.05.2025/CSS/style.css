@@ -1,0 +1,81 @@
+/* element selector */
+p{
+    color: red;
+    overflow-wrap: break-word;
+}
+
+/* class selector */
+.amazing{
+    color:aqua;
+    background-color: blueviolet;
+    overflow-wrap: break-word;
+}
+
+/* id selector */
+#copyright{
+    background-color: black;
+    color: white;
+    overflow-wrap: break-word;
+}
+
+/* בחירת אלמנטים לפי מצב - hover הוא מצב של מעבר עכבר */
+a:hover{
+    color:aqua
+}
+
+/* בחירה לפי תכונה - במקרה זה בחירת שדות קלט מסוג email */
+input[type="email"]{
+    background-color: aqua;
+}
+
+/* בחירה לפי class - יצירת קופסה עם מידות מוגדרות */
+.box{
+    background-color:firebrick;
+    width: 200px;
+    height: 200px;
+    text-align:  center;
+}
+
+/* בחירה משולבת - בחירת פסקאות שנמצאות בתוך אלמנט עם class של box */
+.box p{
+    color: blue;
+    background-color: darksalmon;
+    padding: 10px;
+}
+
+/* בחירה לפי סדר - בחירת האלמנט הראשון מתוך רשימה */
+li:first-child {
+    font-weight: bold;
+    color: green;
+}
+
+/* בחירה לפי מצב - בחירת קישורים שכבר בוקרו */
+a:visited {
+    color: purple;
+}
+
+/* בחירה לפי תכונה - בחירת תמונות עם alt */
+img[alt] {
+    border: 2px solid gold;
+}
+
+/* בחירה לפי מיקום - בחירת האלמנט האחרון */
+p:last-of-type {
+    font-style: italic;
+}
+
+/* בחירה לפי מצב - בחירת שדות קלט כשהם בפוקוס */
+input:focus {
+    background-color: yellow;
+    border: 2px solid orange;
+}
+
+/* בחירה לפי תכונה - בחירת קישורים שמתחילים ב-https */
+a[href^="https"] {
+    color: green;
+}
+
+/* בחירה לפי תכונה - בחירת תמונות שמסתיימות ב-.jpg */
+img[src$=".jpg"] {
+    border-radius: 10px;
+}

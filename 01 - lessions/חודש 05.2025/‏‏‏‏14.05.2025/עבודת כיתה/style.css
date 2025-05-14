@@ -1,0 +1,74 @@
+p{
+    color: red;
+    text-align: left;
+    padding: 20px;
+}
+a{
+    color: white;
+    background-color: orange;
+    font-size: large;
+    font-weight: bold;
+    padding: 20px;
+    border-radius: 10px;
+     text-decoration: none; /*להוריד את הקו מתחת לקישור */
+}
+a:hover{
+    border: 3px solid black;
+    color: purple;
+}
+
+.highlight{
+    color: blue;
+    background-color: yellow;
+}
+
+
+#footer{
+    background-color: black;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+
+input[type = "Text"]{
+    background-color: violet;
+}
+
+input[type = "email"]{
+    background-color: aqua;
+}
+
+
+.container{
+    background-color: yellow;
+    padding: 20px;
+}
+
+.container p{
+    background-color: gray;
+    color: yellow;
+    padding: 1px;
+}
+
+
+
+
+
+
+
+
+/* משנה את מה שהמשתמש מקליד כשאר הוא עובר עם העכבר
+input[type="Username"]:hover {
+    color: brown;
+    padding: 20px;
+}
+
+.Username:hover{
+    color: slateblue;
+    background-color: aqua;
+    lighting-color: yellow;
+}
+.box p{
+    color: gray;
+} */
