@@ -1,0 +1,48 @@
+div:nth-child(1){
+    box-shadow: red;
+    text-shadow: black;
+    background-color: aqua;
+}
+
+div:nth-child(2){
+    background: linear-gradient(to right, red, green, blue);
+    color:white;
+    font-size: xx-large;
+}
+div:nth-child(3){
+    transform: rotate(20deg);
+    scale: 20px;
+    padding: 20px;
+    text-align: center;
+}
+
+div:nth-child(4){
+    animation: coolanimation 3s infinite;
+}
+
+div:nth-child(5){
+    font-family: font_div;
+}
+
+@font-face {
+    font-family: font_div;
+    src: url("public/fonts/Milestones.otf");
+}
+
+@keyframes coolanimation{
+    0%{
+        width: 100px;
+        color: orange;
+    }
+    30%{
+        width: 200px;
+        color: blue;
+        transform: rotate(45deg);
+    }
+    100%{
+        width: 180px;
+        color: red;
+        transform: rotate(50deg);
+    }
+}
+

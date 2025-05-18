@@ -1,0 +1,23 @@
+.nav{
+    background-color: black;
+    padding: 10px;
+    display: block;
+}
+.nav div{
+    display: inline;
+    background-color: red;
+    width:100px;
+    text-align: center;
+    border:1px solid yellow;
+    padding: 10px;
+    margin-right: 10px;
+    color: wheat;
+    border-radius: 5px;
+    font-size: 30px;
+}
+
+.nav div:hover{
+    background-color: green;
+    color: peru;
+    
+}
