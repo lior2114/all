@@ -1,0 +1,35 @@
+html,body{
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+    text-align: center;
+    font-size: large;
+    background-image: linear-gradient(45deg, lightblue, white);
+}
+
+/* * אומר לכל אחד בנפרד  */
+.layout > *{
+    border: 1px solid black;
+}
+
+/* נגיד אם יש קלאסס בתוך קלאסס אז ככה אבל זה לא במקרה שלנו */
+/* .layout, .layout{
+    border: 1px solid;
+} */
+
+.layout{
+    height: 100%;
+    box-sizing: border-box;
+    display: grid;
+    grid-template: repeat(6,1fr);
+    grid-template-rows: 20% 70% 10%;
+}
+
+header, footer{
+    /* המספר 6 נובע מזה שיש לנו 6 בריפיט */
+    grid-column: span 6;
+}
+
+main{
+    grid-column: span 4;
+}

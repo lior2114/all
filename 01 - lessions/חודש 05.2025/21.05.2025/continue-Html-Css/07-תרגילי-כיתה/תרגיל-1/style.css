@@ -1,0 +1,43 @@
+body{
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+    text-align: center;
+    font-size: large;
+    background-image: linear-gradient(45deg, lightblue, white);
+}
+
+#top-bar{
+    display: flex;
+    align-items: center;
+    background-color: gray;
+    padding: 10px 20px;
+    color: wheat;
+    /* gap: 10px; */
+}
+
+/* 2 */
+#top-bar div{
+    margin-left: 30px;
+    padding: 8px 12px;
+    border: 1px solid;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: black;
+    transition: background-color 0.5s;
+}
+
+#top-bar div:hover{
+    background-color: blue;
+}
+
+#top-bar >div:first-child{
+    margin-left: auto;
+    margin-right: 0px;
+    cursor: pointer;
+}
+
+.logo img{
+    width: 100px;
+
+}

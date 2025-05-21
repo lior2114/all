@@ -1,0 +1,18 @@
+section{
+    border: 1px solid blue;
+    padding:5px;
+    display: grid;
+    /* כמה אחוז מהדף זה יתפוס מתוך 100% */
+    /* grid-template-columns: 40% 40% 20%; */
+    /* (5fr) = 1fr = 20% */
+    /* grid-template-columns: 2fr 1fr 2fr; */
+    grid-template-columns: repeat(3,1fr);
+}
+
+section div{
+    font-size: x-large;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: aliceblue ;
+}
