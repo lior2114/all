@@ -1,0 +1,35 @@
+html,body{
+    background-image: linear-gradient(45deg gray purple);
+    margin: 0px;
+    padding: 0px;
+}
+
+h1{
+    text-align: center;
+}
+
+#gallery{
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 20px;
+
+}
+
+.box{
+   display: flex;
+   flex-direction: column;
+    gap: 10px;
+}
+
+.box img{
+    width: 200px;
+    height: auto;
+}
+
+.text{
+    border:  1px solid black;
+    text-align: center;
+    font-size: xx-large;
+    
+}
