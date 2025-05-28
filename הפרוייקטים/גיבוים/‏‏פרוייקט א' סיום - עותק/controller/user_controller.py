@@ -64,6 +64,11 @@ class Users_Controller:
             return jsonify({"Error": "first_name must contain only letters"}), 400
         if "last_name" in data and (not str(data["last_name"]).isalpha()):
             return jsonify({"Error": "last_name must contain only letters"}), 400
+        if "role_id" in data:
+            return jsonify({"error":"cant update role_id (can be update only in DataBase)"})
+        if "user_email" in data:
+            if U.if_mail_exists(data["user_email"])==False:
+                return jsonify({"Error":"Mail already exists in the system"})
         result = U.update_user_by_id(user_id, data)
         if result is None:
             return jsonify({"Error": "user not found"}), 400
@@ -73,3 +78,16 @@ class Users_Controller:
     def delete_user_by_id(user_id):
         result = U.delete_user_by_id(user_id)
         return jsonify(result), 201
+    
+    @staticmethod
+    def check_if_email_exists():
+        data = request.get_json()
+        if not data:
+            return jsonify ({"Error":"Missing values or data empty"}), 400
+        if not "user_email" in data:
+            return jsonify ({"error":"wrong value"})
+        if U.if_mail_exists(data["user_email"]) == False:
+            return jsonify({"Message":"email alredy exists in system"})
+        if U.if_mail_exists(data["user_email"]) == True:
+            return jsonify({"Message":"email not exists"})
+        

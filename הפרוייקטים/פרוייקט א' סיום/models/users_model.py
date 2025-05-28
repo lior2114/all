@@ -129,7 +129,6 @@ class Users_Model:
             pair = pair [:-1]
             sql = f'''update users 
                     set {pair} where user_id = ?'''
-            
             cursor.execute(sql,(user_id ,))
             connection.commit()
             cursor.close()

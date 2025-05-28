@@ -27,3 +27,7 @@ def update_user_by_id(user_id):
 @users_bp.route("/users/<int:user_id>", methods = ["DELETE"])
 def delete_user_by_id(user_id):
     return U.delete_user_by_id(user_id)
+
+@users_bp.route("/users/check_email", methods = ["GET"])
+def check_if_mail_exists():
+    return U.check_if_email_exists()

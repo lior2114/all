@@ -49,7 +49,10 @@ class Users_Model:
     def get_all_users():
         with Users_Model.get_db_connection() as connection:
             cursor = connection.cursor()
-            sql = "select * from users"
+            sql = '''SELECT users.user_id, users.first_name, users.last_name, users.user_email, users.user_password, roles.role_name
+            FROM users
+            INNER JOIN roles ON roles.role_id = users.role_id
+            '''
             cursor.execute(sql)
             users = cursor.fetchall()
             if not users:
@@ -126,7 +129,6 @@ class Users_Model:
             pair = pair [:-1]
             sql = f'''update users 
                     set {pair} where user_id = ?'''
-            
             cursor.execute(sql,(user_id ,))
             connection.commit()
             cursor.close()

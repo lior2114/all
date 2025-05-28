@@ -545,6 +545,41 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "בדיקה אם המייל קיים",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"user_email\":\"admin@exampl.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:5000/users/check_email",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"users",
+								"check_email"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
