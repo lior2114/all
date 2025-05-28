@@ -489,7 +489,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"user_email\" : \"22dsffds@gdfgdf.com\"\r\n}",
+							"raw": "{\r\n    \"first_name\" : \"Admin\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -497,7 +497,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:5000/users/5",
+							"raw": "http://127.0.0.1:5000/users/1",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -508,7 +508,7 @@
 							"port": "5000",
 							"path": [
 								"users",
-								"5"
+								"1"
 							]
 						}
 					},
@@ -541,41 +541,6 @@
 							"path": [
 								"users",
 								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "הצגת המשתמש לפי האימייל והסיסמא",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"user_email\":\"user@example.com\",\r\n    \"user_password\":\"user123\"\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://127.0.0.1:5000/users/login",
-							"protocol": "http",
-							"host": [
-								"127",
-								"0",
-								"0",
-								"1"
-							],
-							"port": "5000",
-							"path": [
-								"users",
-								"login"
 							]
 						}
 					},

@@ -64,8 +64,6 @@ class Users_Controller:
             return jsonify({"Error": "first_name must contain only letters"}), 400
         if "last_name" in data and (not str(data["last_name"]).isalpha()):
             return jsonify({"Error": "last_name must contain only letters"}), 400
-        if "role_id" in data:
-            return jsonify({"error":"cant update role_id (can be update only in DataBase)"})
         result = U.update_user_by_id(user_id, data)
         if result is None:
             return jsonify({"Error": "user not found"}), 400
