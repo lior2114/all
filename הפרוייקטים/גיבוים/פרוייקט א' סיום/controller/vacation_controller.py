@@ -47,20 +47,16 @@ class Vacations_Controller:
     @staticmethod
     def update_vacation_by_id(vacation_id):
         data = request.get_json()
-        fields = ["country_id", "vacation_description", "vacation_start", "vacation_ends", "vacation_price"]
-        if not data or not all(k in fields for k in data):
-            return jsonify ({"Error":"Missing values or data empty / cant update vacation_file_name"}), 400
         if not data:
             return jsonify({"Error": "No data provided"}), 400
-        if "vacation_price" in data:
-            if float(data["vacation_price"]) > 10000 or float(data["vacation_price"]) < 0: #הופך לפלואט שגם אם המשתמש בטעות יכניס עם גרשיים אז זה יחזיר את זה למספר ויכניס בלי שיקריס את השרת 
-                return jsonify({"Error": "vacation_price cant be lower then 0 or high then 10000"}), 400
-            
         result = V.update_vacation_by_id(vacation_id, data)
         if "Error" in result:
             return jsonify(result), 400
+            
+        if "vacation_price" in data:
+            if float(data["vacation_price"]) > 10000 or float(data["vacation_price"]) < 0: #הופך לפלואט שגם אם המשתמש בטעות יכניס עם גרשיים אז זה יחזיר את זה למספר ויכניס בלי שיקריס את השרת 
+                return jsonify({"Error": "vacation_price cant be lower then 0 or high then 10000"}), 400
         return jsonify(result), 201
-        
     
     @staticmethod
     def delete_vacation_by_id(vacation_id):
