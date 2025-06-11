@@ -11,7 +11,6 @@ class Vacations_Controller:
         if not data or not all(k in fields for k in data):
             return jsonify ({"Error":"Missing values or data empty"}), 400
         
-        #לקחתי מהצאט כי לא ידעתי את הפונקציות המתאימות של הבדיקת התאריכים 
         start_date = datetime.strptime(data["vacation_start"], "%Y-%m-%d")
         end_date = datetime.strptime(data["vacation_ends"], "%Y-%m-%d")
         if start_date > end_date:

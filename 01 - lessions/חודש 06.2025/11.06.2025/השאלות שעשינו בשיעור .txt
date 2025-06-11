@@ -1,0 +1,212 @@
+צרו פונקציה הקולטת באמצעות prompt מהמשתמש את ששת  משכורות לרשימה .
+הציגו את ממוצע המשכורות.
+הציגו את המשכורת הגבוהה ביותר.
+הציגו את המשכורת הנמוכה ביותר.
+
+Function inputSalary(){
+
+
+}
+זמן את הפונקציה 
+function inputSalary(){
+    let salaries = []
+    for(let i=0;i<6;i++){
+        let salary = +prompt("enter salary")
+        salaries.push(salary)
+    }//end of for 
+    let sum = 0 
+    let max = salaries[0]
+    let min = salaries[0]
+    for(let i=0;i<salaries.length;i++){
+        sum+= salaries[i]
+
+
+        if(salaries[i] > max){
+            max = salaries[i]
+        }
+        if(salaries[i] < min){
+            min = salaries[i]
+        }
+
+
+    }// end of for 
+    let avearge = sum/salaries.length
+    alert("average is :" + avearge  + "min is : " + min +  " and max is : " + max )
+}
+
+
+inputSalary()
+
+
+
+
+
+
+
+
+
+צרו Set ריק. הוסיפו אליו 2000 מספרים רנדומליים, כל מספר בין 1 עד 1000 (כולל קצוות).
+הציגו את ה-Set.
+הציגו את ממוצע המספרים.
+קילטו מהמשתמש מספר, הציגו הודעה המציינת האם המספר הזה נמצא ב-Set או לא.
+ע"י לולאה, רוצו על ה-Set והציגו כל מספר ואת החזקה הריבועית שלו:
+Number: ___, Power: ___.
+Number: ___, Power: ___.
+function test(){
+    let arr = new Set() 
+    for(let i=0;i<5;i++){
+        let number = +prompt("enter a num")
+        arr.add(number)
+    }
+    arr.add("hello")
+    console.log(arr)
+
+
+    if(arr.has(3)){
+        alert("3 exist")
+    }
+    if(arr.has("hello")){
+        alert("hello exist")
+    }
+    if(arr.has(100)){
+        arr.delete(100) // delete value 100 
+        alert("100 removed")
+
+
+    }
+}
+
+צרו Set ריק. הוסיפו אליו 10000 מספרים רנדומליים, כל מספר בין 1 ל-100 (כולל קצוות).
+חשבו את סכום כל המספרים שנמצאים ב-Set. האם הסכום שווה ל-5050? אם כן – איך זה יכול להיות אם הכנסתם מספרים רנדומליים?
+
+Dictionary 
+let student = {
+    name:"Avi",
+    age:17, 
+    grade:92
+}
+console.log(student.name)// Avi 
+console.log(student["name"]) // Avi 
+student.city = "Dimini" // add key city 
+//change key age 
+student.age = 18 
+//change key age 
+student.age++
+//add key password 
+student.password = "123456"
+console.log(student)
+
+
+//delete key example 
+delete student.age 
+
+
+console.log(student) // key age removed 
+
+
+if("name" in student){
+    alert("key name exist")
+}
+else{
+    alert("key name not exist") 
+}
+
+
+for(let key in student){
+    console.log(key) // all exist keys - name, password, grade , city 
+    console.log(student[key]) // all exist values  
+}
+
+
+console.log(student.age) // undefined
+
+צרו Dictionary המכיל מוצרי אלקטרוניקה. לכל מוצר יש קוד (מספר בן 3 ספרות) ושם (מחרוזת).
+ה-Key זהו קוד המוצר, וה-Value זהו שם המוצר.
+על ה-Dictionary להכיל 3 מוצרים שונים Hard-Coded.
+קילטו מהמשתמש מוצר נוסף (קוד + שם). הוסיפו אותו ל-Dictionary.
+קילטו מהמשתמש קוד מוצר, הציגו את המוצר השייך לקוד הזה (כמובן שאסור לתוכנית לקרוס).
+ע"י לולאה, הציגו את כל המוצרים, כל מוצר בשורה נפרדת בפורמט הבא:
+Product ID: ___, Product Name: ___.
+Product ID: ___, Product Name: ___.
+…
+קילטו מהמשתמש קוד מוצר, בצעו מחיקה של המוצר הזה מהאוסף. מה קורה אם הקוד לא קיים?
+הציגו את המוצרים שוב.
+
+let products = {
+    123:"tv",
+    562:"radio",
+    453:"tshirt"
+}
+
+
+let code = prompt("enter a code")
+let product = prompt("enter product name")
+products[code] = product
+let c = +prompt("enter product name")
+alert(products[c])
+
+
+console.log(products)
+
+
+for(let key in products){
+    console.log("id is :" + key + " and prodcut is " + products[key])
+
+
+}
+
+
+code = prompt("find a code")
+if (code in products)
+{
+    alert(products[code] + " exist")
+    delete products[code]
+} 
+else{
+    alert("code not exist")
+}
+console.log(products)
+
+תרגיל 7 
+
+🔹 תרגיל a
+צור אובייקט בשם car עם המאפיינים:
+ brand, model, year — עם ערכים שאתה בוחר.
+ הדפס את כל אחד מהם בעזרת console.log.
+
+🔹 תרגיל b
+הוסף לאובייקט car מאפיין חדש בשם color עם ערך כלשהו.
+
+🔹 תרגיל c
+שנה את הערך של year ל־2025.
+
+🔹 תרגיל d
+מחק את המאפיין model מתוך האובייקט.
+
+🔹 תרגיל e
+כתוב פונקציה שמקבלת אובייקט student עם מאפיינים name, grade, ומדפיסה:
+
+שם התלמיד: X, ציון: Y
+
+
+🔹 תרגיל f
+צור אובייקט בשם book עם מפתחות: title, author, pages.
+ כתוב לולאת for...in שמדפיסה את כל המפתחות והערכים שלו.
+
+🔹 תרגיל g
+כתוב פונקציה שמקבלת אובייקט ומחזירה את מספר המפתחות בו.
+
+🔹 תרגיל h
+צור מערך של אובייקטים בשם products.
+ כל אובייקט מייצג מוצר עם name, price, inStock.
+ הדפס את שמות כל המוצרים שנמצאים במלאי (inStock === true).
+
+🔹 תרגיל i
+כתוב פונקציה שמקבלת אובייקט שבו מפתחות הם שמות תלמידים וערכים הם ציונים.
+ הפונקציה תחזיר את השם של התלמיד עם הציון הגבוה ביותר.
+
+🔹 תרגיל j
+צור אובייקט בשם dictionary עם מילים באנגלית כמפתחות, והתרגום לעברית כערכים.
+ כתוב פונקציה שמקבלת מילה באנגלית ומחזירה את התרגום לעברית מתוך ה־dictionary.
+ אם המילה לא קיימת, תחזיר "לא נמצא".
+

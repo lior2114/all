@@ -10,7 +10,7 @@ class Vacations_Model:
 
     @staticmethod
     def get_db_connection():
-        return sqlite3.connect(path_name) 
+        return sqlite3.connect(path_name)
     
     @staticmethod
     def create_table():

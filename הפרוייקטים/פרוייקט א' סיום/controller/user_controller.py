@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from models.users_model import Users_Model as U
-import re #ידוע לי שלא למדנו לקחתי מהצאט כי אין לי מושג איך לרשום את הפונקציה 
+import re 
 
 class Users_Controller:
 
@@ -52,7 +52,7 @@ class Users_Controller:
             return jsonify ({"Error":"Missing values or data empty"}), 400
         for value in data:
             if value not in lis_requimints:
-                return jsonify ({"Error":"invalid key"}), 400
+                return jsonify ({"Error":f"invalid key: {value}"}), 400
         if "user_password" in data and len(data["user_password"].strip()) < 4: #סטריפ מוריד רווחים 
             return jsonify ({"Error":"password need to be more then 4 values"}), 400
         if "user_email" in data:

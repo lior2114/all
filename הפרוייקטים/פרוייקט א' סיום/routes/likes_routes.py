@@ -10,3 +10,6 @@ def add_like_to_vacation():
 def unlike_vacation():
     return L.unlike_vacation()
 
+@likes_bp.route("/likes", methods = ["GET"])
+def show_all_likes():
+    return L.show_all_likes()

@@ -43,3 +43,18 @@ class Likes_Model:
             connection.commit()
             cursor.close()
             return {"Message":f"user_id {user_id} has been unliked vacation_id {vacation_id} successfully"}
+        
+    @staticmethod
+    def show_likes():
+        with Likes_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            sql = '''SELECT users.user_id, vacations.vacation_id 
+                     FROM likes
+                     INNER JOIN users ON likes.user_id = users.user_id
+                     INNER JOIN vacations ON likes.vacation_id = vacations.vacation_id'''
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            if not results:
+                return {"Message":"no user_id or not vacation_id or data is empty"}
+            cursor.close()
+            return results

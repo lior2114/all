@@ -15,4 +15,7 @@ class Likes_Controller:
             return jsonify({"Error": "No data provided or user_id or vacation_id is missing"}), 400
         result = L.unlike_vacation(data["user_id"], data["vacation_id"])
         return jsonify(result), 201
-        
+    
+    def show_all_likes():
+        result = L.show_likes()
+        return jsonify(result)
