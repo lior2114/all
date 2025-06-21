@@ -1,0 +1,3 @@
+pip install pyinstaller
+
+pyinstaller --onefile --noconsole "change_name_in_files.py" 
