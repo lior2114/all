@@ -1,3 +1,4 @@
+//אופציה א 
 function generatePrimeNumberAfterDelayAsync(min,max){
     let p = new Promise((resolve,reject)=>{
         setTimeout(() => {
@@ -23,6 +24,26 @@ function generatePrimeNumberAfterDelayAsync(min,max){
     return p;
 }
 
+
+
+//  אופציה ב
+function generatePrimeNumberAfterDelayAsync(min, max){
+    let p = new Promise((resolve, reject)=>{
+        setTimeout(() => {
+            let number = min + Math.floor(Math.random() * (max - min));
+            for(let i = 2; i <= number / 2; i++){
+                if(number % i == 0){
+                    reject(i + ": not prime");
+                }
+            }
+            resolve(number + ": is prime");
+        }, 1000);
+    });
+    return p;
+}
+
+
+
 function click_to_activate(){
     const min = parseInt(document.getElementById('MinNumber').value)
     const max = parseInt(document.getElementById('MaxNumber').value)
@@ -31,3 +52,7 @@ function click_to_activate(){
         .then ((success)=> {show_div.textContent = success})
         .catch((error) => {show_div.textContent = error})
 }
+
+
+
+

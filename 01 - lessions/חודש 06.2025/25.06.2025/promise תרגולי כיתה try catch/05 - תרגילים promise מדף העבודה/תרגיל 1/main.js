@@ -34,7 +34,7 @@ function generate7BoomAfterDelayAsync(min,max){
     return p;
 }
 function handleClick() {
-    const min = parseInt(document.getElementById('minInput').value);
+    const min = parseInt(document.getElementById('minInput').value); // אפשר גם להשים ב=במקום pareint  +
     const max = parseInt(document.getElementById('maxInput').value);
     const resultDiv = document.getElementById('result');
     generate7BoomAfterDelayAsync(min, max)
