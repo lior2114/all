@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import './App.css'
+import React, { useState } from "react";
 
-function App() {
+
+export function True_False() {
   const [isVisible, setIsVisible] = useState(true)
   const [message, setMessage] = useState("")
 
@@ -28,5 +28,3 @@ function App() {
     </>
   )
 }
-
-export default App
