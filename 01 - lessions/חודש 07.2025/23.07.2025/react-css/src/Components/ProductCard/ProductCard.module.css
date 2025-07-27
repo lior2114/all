@@ -1,0 +1,22 @@
+.card{
+    border: 4px solid gold;
+    padding: 16px;
+    border-radius: 12px;
+    background-color: blanchedalmond;
+
+}
+.title{
+    color:red
+}
+
+.btn{
+    background-color: blue;
+    color: wheat;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+}
+.btn:hover{
+    background-color: aqua;
+    font-size: medium}

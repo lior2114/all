@@ -1,0 +1,23 @@
+.all{
+    padding: 10px;
+    background-color: blue;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 5px 5px 10px rgba(255, 0, 0, 0.3);
+    display: inline-block;
+    margin: 5px;
+    
+}
+ .p{
+    background-color: white;
+ }
+.btn{
+    margin: 5px;
+    overflow: hidden;
+    background-color: burlywood;
+    display: flow-root;
+}
+
+.btn:hover{
+    background-color: crimson;
+}
