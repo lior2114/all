@@ -1,0 +1,4 @@
+למדנו על routing כדי להפעיל אותה צריך בקובץ הפרוייקט לרשום בטרמינל npm install react-router-dom
+אחרי שסיימנו עם הקוד (עם route) נצטרך גם  ב main.jsx לעטוף אותו ב<BrowserRouter>
+ולמדנו בנוסף על Destructure שמה שהוא עושה זה בעצם להפוך משתנה עם הרבה משתנים למשתנה אחד שקולט לפי השמות ששמנו כגון: const person = { namee: "Dana", age: 50 };
+																														const { namee, age } = person;
