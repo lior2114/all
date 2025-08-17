@@ -39,3 +39,11 @@ def update_profile_image(user_id):
 @users_bp.route("/users/<int:user_id>/profile-image", methods = ["DELETE"])
 def remove_profile_image(user_id):
     return U.remove_profile_image(user_id)
+
+@users_bp.route("/users/<int:user_id>/ban", methods = ["POST"])
+def ban_user(user_id):
+    return U.ban_user(user_id)
+
+@users_bp.route("/users/<int:user_id>/unban", methods = ["POST"])
+def unban_user(user_id):
+    return U.unban_user(user_id)

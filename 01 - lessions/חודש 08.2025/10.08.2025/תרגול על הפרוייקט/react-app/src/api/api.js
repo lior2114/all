@@ -23,18 +23,25 @@ export const register = async (userData) => {
 }
 
 export const login = async (userData) => {
-    // Use the correct endpoint and method for login
-    const response = await fetch(`${API_URL}/users/login`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData)
-    })
-    if (!response.ok){
-        throw new Error("filed to login")
+    try {
+        const response = await fetch(`${API_URL}/users/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.Error || 'שגיאה בהתחברות');
+        }
+        
+        return response.json();
+    } catch (error) {
+        console.error('Login error:', error);
+        throw error;
     }
-    return response.json()
 }
 
 // פונקציה לקבלת כל החופשות
@@ -244,8 +251,16 @@ export const updateUser = async (userId, userData) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'שגיאה בעדכון המשתמש');
+            let errorMessage = 'שגיאה בעדכון המשתמש';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.Error || errorData.error || errorMessage;
+            } catch (parseError) {
+                console.error('Error parsing response:', parseError);
+                const textResponse = await response.text();
+                console.error('Response text:', textResponse);
+            }
+            throw new Error(errorMessage);
         }
 
         const result = await response.json();
@@ -472,6 +487,28 @@ export const banUser = async (userId, banData) => {
         return await response.json();
     } catch (error) {
         console.error('Error banning user:', error);
+        throw error;
+    }
+};
+
+// ביטול הרחקת משתמש
+export const unbanUser = async (userId) => {
+    try {
+        const response = await fetch(`${API_URL}/users/${userId}/unban`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'שגיאה בביטול הרחקת המשתמש');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error unbanning user:', error);
         throw error;
     }
 };

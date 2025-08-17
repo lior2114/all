@@ -8,7 +8,9 @@ class Users_Model:
 
     @staticmethod
     def get_db_connection():
-        return sqlite3.connect(path_name)
+        connection = sqlite3.connect(path_name, timeout=20.0)
+        connection.execute("PRAGMA journal_mode=WAL")
+        return connection
     
     @staticmethod
     def create_table():
@@ -30,6 +32,28 @@ class Users_Model:
             # הוספת עמודת profile_image אם לא קיימת
             try:
                 cursor.execute("ALTER TABLE users ADD COLUMN profile_image text")
+                connection.commit()
+            except sqlite3.OperationalError:
+                # העמודה כבר קיימת
+                pass
+            
+            # הוספת עמודות להרחקת משתמשים אם לא קיימות
+            try:
+                cursor.execute("ALTER TABLE users ADD COLUMN is_banned boolean DEFAULT 0")
+                connection.commit()
+            except sqlite3.OperationalError:
+                # העמודה כבר קיימת
+                pass
+            
+            try:
+                cursor.execute("ALTER TABLE users ADD COLUMN ban_reason text")
+                connection.commit()
+            except sqlite3.OperationalError:
+                # העמודה כבר קיימת
+                pass
+            
+            try:
+                cursor.execute("ALTER TABLE users ADD COLUMN ban_until text")
                 connection.commit()
             except sqlite3.OperationalError:
                 # העמודה כבר קיימת
@@ -60,7 +84,7 @@ class Users_Model:
     def get_all_users():
         with Users_Model.get_db_connection() as connection:
             cursor = connection.cursor()
-            sql = '''SELECT users.user_id, users.first_name, users.last_name, users.user_email, users.user_password, roles.role_name
+            sql = '''SELECT users.user_id, users.first_name, users.last_name, users.user_email, users.user_password, roles.role_name, users.is_banned, users.ban_reason, users.ban_until
             FROM users
             INNER JOIN roles ON roles.role_id = users.role_id
             '''
@@ -77,7 +101,10 @@ class Users_Model:
                     "last_name":row[2],
                     "user_email":row[3],
                     "user_password":row[4],
-                    "role_id":row[5]
+                    "role_id":row[5],
+                    "is_banned":bool(row[6]) if len(row) > 6 else False,
+                    "ban_reason":row[7] if len(row) > 7 else None,
+                    "ban_until":row[8] if len(row) > 8 else None
                 }
                 for row in users
             ]
@@ -101,7 +128,10 @@ class Users_Model:
                     "user_email":user[3],
                     "user_password":user[4],
                     "role_id":user[5],
-                    "profile_image":user[6] if len(user) > 6 else None
+                    "profile_image":user[6] if len(user) > 6 else None,
+                    "is_banned":bool(user[7]) if len(user) > 7 else False,
+                    "ban_reason":user[8] if len(user) > 8 else None,
+                    "ban_until":user[9] if len(user) > 9 else None
                 }
         
     @staticmethod
@@ -122,30 +152,39 @@ class Users_Model:
                 "user_email":user[3],
                 "user_password":user[4],
                 "role_id":user[5],
-                "profile_image":user[6] if len(user) > 6 else None
+                "profile_image":user[6] if len(user) > 6 else None,
+                "is_banned":bool(user[7]) if len(user) > 7 else False,
+                "ban_reason":user[8] if len(user) > 8 else None,
+                "ban_until":user[9] if len(user) > 9 else None
             }
         
     @staticmethod
     def update_user_by_id(user_id, data):
-        with Users_Model.get_db_connection() as connection:
-            cursor = connection.cursor()
-            sql = "select * from users where user_id =?"
-            cursor.execute(sql,(user_id  ,))
-            user = cursor.fetchone()
-            if not user:
+        try:
+            with Users_Model.get_db_connection() as connection:
+                cursor = connection.cursor()
+                sql = "select * from users where user_id =?"
+                cursor.execute(sql,(user_id  ,))
+                user = cursor.fetchone()
+                if not user:
+                    cursor.close()
+                    return {"Massages":"No users with that ID"}
+                
+                # שימוש ב-parameterized queries למניעת SQL injection
+                set_clauses = []
+                values = []
+                for key, value in data.items():
+                    set_clauses.append(f"{key} = ?")
+                    values.append(value)
+                values.append(user_id)
+                
+                sql = f"UPDATE users SET {', '.join(set_clauses)} WHERE user_id = ?"
+                cursor.execute(sql, values)
+                connection.commit()
                 cursor.close()
-                return {"Massages":"No users with that ID"}
-            
-            pair = ""
-            for key,value in data.items():
-                pair += key + "=" + "'" + value + "'" + ","
-            pair = pair [:-1]
-            sql = f'''update users 
-                    set {pair} where user_id = ?'''
-            cursor.execute(sql,(user_id ,))
-            connection.commit()
-            cursor.close()
-            return {"Message":f"user_id {user_id} has been updated successfully"}
+                return {"Message":f"user_id {user_id} has been updated successfully"}
+        except Exception as e:
+            return {"Error": f"Database error: {str(e)}"}
     
     @staticmethod
     def delete_user_by_id(user_id):

@@ -44,7 +44,8 @@ const Profile = () => {
     first_name: '',
     last_name: '',
     user_email: '',
-    password: ''
+    current_password: '',
+    new_password: ''
   });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
@@ -67,7 +68,8 @@ const Profile = () => {
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         user_email: user.user_email || '',
-        password: ''
+        current_password: '',
+        new_password: ''
       });
     }
   }, [user]);
@@ -109,26 +111,41 @@ const Profile = () => {
       setEditLoading(true);
       setEditError('');
       
+      // בדיקה שחובה להזין סיסמה נוכחית
+      if (!editForm.current_password.trim()) {
+        setEditError('חובה להזין את הסיסמה הנוכחית');
+        return;
+      }
+      
       const updateData = {
         first_name: editForm.first_name,
         last_name: editForm.last_name,
-        user_email: editForm.user_email
+        user_email: editForm.user_email,
+        current_password: editForm.current_password
       };
       
-      if (editForm.password) {
-        updateData.password = editForm.password;
+      // אם המשתמש רוצה לשנות סיסמה
+      if (editForm.new_password.trim()) {
+        updateData.new_password = editForm.new_password;
       }
       
       const result = await updateUser(user.user_id, updateData);
       
-      // עדכון הקונטקסט
-      updateUserContext({
+      // עדכון הקונטקסט עם שמירה ב-localStorage
+      const updatedUserData = {
         ...user,
-        ...updateData
-      });
+        first_name: editForm.first_name,
+        last_name: editForm.last_name,
+        user_email: editForm.user_email
+      };
+      updateUserContext(updatedUserData);
       
       setEditDialogOpen(false);
-      setEditForm({ ...editForm, password: '' });
+      setEditForm({ 
+        ...editForm, 
+        current_password: '', 
+        new_password: '' 
+      });
     } catch (err) {
       setEditError(err.message || 'שגיאה בעדכון הפרטים');
     } finally {
@@ -177,11 +194,12 @@ const Profile = () => {
       // קריאה לשרת לעדכון תמונת הפרופיל
       const result = await updateProfileImage(user.user_id, formData);
       
-      // עדכון הקונטקסט עם התמונה החדשה
-      updateUserContext({
+      // עדכון הקונטקסט עם התמונה החדשה ושמירה ב-localStorage
+      const updatedUserData = {
         ...user,
         profile_image: result.profile_image_url ? `http://localhost:5000${result.profile_image_url}` : null
-      });
+      };
+      updateUserContext(updatedUserData);
       
       // איפוס המצב
       setProfileImage(null);
@@ -204,11 +222,12 @@ const Profile = () => {
       // קריאה לשרת להסרת תמונת הפרופיל
       await removeProfileImageAPI(user.user_id);
       
-      // עדכון הקונטקסט - הסרת תמונת הפרופיל
-      updateUserContext({
+      // עדכון הקונטקסט - הסרת תמונת הפרופיל ושמירה ב-localStorage
+      const updatedUserData = {
         ...user,
         profile_image: null
-      });
+      };
+      updateUserContext(updatedUserData);
       
       // איפוס המצב
       setProfileImage(null);
@@ -812,10 +831,22 @@ const Profile = () => {
               <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
+                  label="סיסמה נוכחית *"
+                  type="password"
+                  value={editForm.current_password}
+                  onChange={(e) => setEditForm({ ...editForm, current_password: e.target.value })}
+                  variant="outlined"
+                  required
+                  helperText="חובה להזין את הסיסמה הנוכחית"
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
                   label="סיסמה חדשה (אופציונלי)"
                   type="password"
-                  value={editForm.password}
-                  onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                  value={editForm.new_password}
+                  onChange={(e) => setEditForm({ ...editForm, new_password: e.target.value })}
                   variant="outlined"
                   helperText="השאר ריק אם אינך רוצה לשנות את הסיסמה"
                 />

@@ -46,37 +46,101 @@ class Users_Controller:
             return jsonify ({"Error":"Missing values or data empty"}), 400
         if "user_email" not in data or "user_password" not in data:
             return jsonify ({"Error":"Missing values or data empty"}), 400
+        
         result = U.show_user_by_email_and_password(data["user_email"], data["user_password"])
+        
+        # בדיקה אם יש שגיאה בהתחברות
+        if "Massages" in result:
+            return jsonify(result), 400
+        
+        # בדיקה אם המשתמש מוחרם
+        if result and "is_banned" in result and result["is_banned"]:
+            # בדיקה אם ההרחקה הסתיימה
+            ban_until = result.get('ban_until')
+            if ban_until:
+                from datetime import datetime
+                try:
+                    ban_date = datetime.fromisoformat(ban_until.replace('Z', '+00:00'))
+                    current_date = datetime.now()
+                    if current_date > ban_date:
+                        # ההרחקה הסתיימה - ביטול ההרחקה
+                        U.update_user_by_id(result["user_id"], {
+                            "is_banned": False,
+                            "ban_reason": None,
+                            "ban_until": None
+                        })
+                    else:
+                        # המשתמש עדיין מוחרם
+                        return jsonify({
+                            "Error": "המשתמש הורחק מהמערכת. אנא פנה למנהל המערכת לפרטים נוספים."
+                        }), 403
+                except:
+                    # אם יש בעיה עם התאריך, המשתמש נשאר מוחרם
+                    return jsonify({
+                        "Error": "המשתמש הורחק מהמערכת. אנא פנה למנהל המערכת לפרטים נוספים."
+                    }), 403
+            else:
+                # הרחקה קבועה (ללא תאריך סיום)
+                return jsonify({
+                    "Error": "המשתמש הורחק מהמערכת לצמיתות. אנא פנה למנהל המערכת לפרטים נוספים."
+                }), 403
+        
         return jsonify(result), 201
 
     @staticmethod
     def update_user_by_id(user_id):
         data = request.get_json()
-        lis_requimints = ["first_name", "last_name", "user_email", "user_password", "role_id"]
+        lis_requimints = ["first_name", "last_name", "user_email", "user_password", "password", "current_password", "new_password", "role_id"]
         if not data:
             return jsonify ({"Error":"Missing values or data empty"}), 400
-        for value in data:
-            if value not in lis_requimints:
-                return jsonify ({"Error":f"invalid key: {value}"}), 400
-        if "user_password" in data and len(data["user_password"].strip()) < 4: #סטריפ מוריד רווחים 
-            return jsonify ({"Error":"password need to be more then 4 values"}), 400
-        if "user_email" in data:
-            if not re.match(r"[^@]+@[^@]+\.[^@]+", data["user_email"]): #תנאי בדיקת מיילים
-                return jsonify({"Error": "Invalid email format"}), 400
-            if U.if_mail_exists(data["user_email"]):
-                return jsonify ({"Error":"Email already exists"}), 400
-        if "first_name" in data and (not str(data["first_name"]).isalpha()):
-            return jsonify({"Error": "first_name must contain only letters"}), 400
-        if "last_name" in data and (not str(data["last_name"]).isalpha()):
-            return jsonify({"Error": "last_name must contain only letters"}), 400
+        
+        # בדיקה שחובה להזין סיסמה נוכחית
+        if "current_password" not in data or not data["current_password"].strip():
+            return jsonify ({"Error":"חובה להזין את הסיסמה הנוכחית"}), 400
+        
+        # בדיקת הסיסמה הנוכחית
+        current_user = U.show_user_by_id(user_id)
+        if not current_user or "Massages" in current_user:
+            return jsonify ({"Error":"משתמש לא נמצא"}), 400
+        
+        if current_user["user_password"] != data["current_password"]:
+            return jsonify ({"Error":"הסיסמה הנוכחית שגויה"}), 400
+        
+        # הכנת הנתונים לעדכון
+        update_data = {}
+        
+        # המרת new_password ל-user_password אם נשלח
+        if "new_password" in data and data["new_password"].strip():
+            if len(data["new_password"].strip()) < 4:
+                return jsonify ({"Error":"סיסמה חדשה חייבת להיות לפחות 4 תווים"}), 400
+            update_data["user_password"] = data["new_password"]
+        
+        # הוספת שדות אחרים לעדכון
+        for field in ["first_name", "last_name", "user_email"]:
+            if field in data:
+                update_data[field] = data[field]
+        
+        # בדיקות תקינות
+        if "user_email" in update_data:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", update_data["user_email"]):
+                return jsonify({"Error": "פורמט אימייל לא תקין"}), 400
+            
+            # בדיקה שהאימייל לא קיים אצל משתמש אחר
+            if current_user.get("user_email") != update_data["user_email"]:
+                if U.if_mail_exists(update_data["user_email"]):
+                    return jsonify ({"Error":"האימייל כבר קיים במערכת"}), 400
+        
+        if "first_name" in update_data and (not str(update_data["first_name"]).isalpha()):
+            return jsonify({"Error": "שם פרטי חייב להכיל רק אותיות"}), 400
+        if "last_name" in update_data and (not str(update_data["last_name"]).isalpha()):
+            return jsonify({"Error": "שם משפחה חייב להכיל רק אותיות"}), 400
+        
         if "role_id" in data:
-            return jsonify({"error":"cant update role_id (can be update only in DataBase)"})
-        if "user_email" in data:
-            if U.if_mail_exists(data["user_email"]):
-                return jsonify({"Error":"Mail already exists in the system"})
-        result = U.update_user_by_id(user_id, data)
-        if result is None:
-            return jsonify({"Error": "user not found"}), 400
+            return jsonify({"error":"לא ניתן לעדכן role_id (ניתן לעדכן רק במסד הנתונים)"})
+        
+        result = U.update_user_by_id(user_id, update_data)
+        if result is None or "Massages" in result:
+            return jsonify({"Error": "משתמש לא נמצא"}), 400
         return jsonify(result), 201
     
     @staticmethod
@@ -176,4 +240,64 @@ class Users_Controller:
             
         except Exception as e:
             return jsonify({"error": f"Error removing profile image: {str(e)}"}), 500
+    
+    @staticmethod
+    def ban_user(user_id):
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "No data provided"}), 400
+            
+            # בדיקה שהמשתמש קיים
+            current_user = U.show_user_by_id(user_id)
+            if not current_user or "Massages" in current_user:
+                return jsonify({"error": "משתמש לא נמצא"}), 404
+            
+            # הכנת נתוני ההרחקה
+            ban_data = {
+                "is_banned": True,
+                "ban_reason": data.get("ban_reason", ""),
+                "ban_until": data.get("ban_until", None)
+            }
+            
+            # עדכון המשתמש במסד הנתונים
+            result = U.update_user_by_id(user_id, ban_data)
+            if result is None or "Massages" in result:
+                return jsonify({"error": "שגיאה בעדכון המשתמש"}), 500
+            
+            return jsonify({
+                "message": f"המשתמש {current_user.get('first_name', '')} {current_user.get('last_name', '')} הורחק בהצלחה",
+                "ban_reason": ban_data["ban_reason"],
+                "ban_until": ban_data["ban_until"]
+            }), 200
+            
+        except Exception as e:
+            return jsonify({"error": f"שגיאה בהרחקת המשתמש: {str(e)}"}), 500
+    
+    @staticmethod
+    def unban_user(user_id):
+        try:
+            # בדיקה שהמשתמש קיים
+            current_user = U.show_user_by_id(user_id)
+            if not current_user or "Massages" in current_user:
+                return jsonify({"error": "משתמש לא נמצא"}), 404
+            
+            # ביטול ההרחקה
+            unban_data = {
+                "is_banned": False,
+                "ban_reason": None,
+                "ban_until": None
+            }
+            
+            # עדכון המשתמש במסד הנתונים
+            result = U.update_user_by_id(user_id, unban_data)
+            if result is None or "Massages" in result:
+                return jsonify({"error": "שגיאה בעדכון המשתמש"}), 500
+            
+            return jsonify({
+                "message": f"הרחקת המשתמש {current_user.get('first_name', '')} {current_user.get('last_name', '')} בוטלה בהצלחה"
+            }), 200
+            
+        except Exception as e:
+            return jsonify({"error": f"שגיאה בביטול הרחקת המשתמש: {str(e)}"}), 500
         

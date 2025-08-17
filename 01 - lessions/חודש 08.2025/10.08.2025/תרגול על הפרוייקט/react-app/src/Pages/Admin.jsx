@@ -50,6 +50,7 @@ import {
   updateUserByAdmin,
   deleteUser,
   banUser,
+  unbanUser,
   updateVacation,
   uploadVacationImage,
   getVacationImageUrl,
@@ -113,6 +114,15 @@ const Admin = () => {
   const [banForm, setBanForm] = useState({
     ban_reason: '',
     ban_until: ''
+  });
+
+  // State לאזהרות ספציפיות לכל שדה
+  const [fieldErrors, setFieldErrors] = useState({
+    country_id: '',
+    vacation_description: '',
+    vacation_start: '',
+    vacation_ends: '',
+    vacation_price: ''
   });
 
   useEffect(() => {
@@ -184,30 +194,52 @@ const Admin = () => {
 
   const handleAddVacation = async () => {
     try {
+      // נקה שגיאות קודמות
+      setFieldErrors({
+        country_id: '',
+        vacation_description: '',
+        vacation_start: '',
+        vacation_ends: '',
+        vacation_price: ''
+      });
+      
       // ולידציה
+      let hasErrors = false;
+      const newFieldErrors = {
+        country_id: '',
+        vacation_description: '',
+        vacation_start: '',
+        vacation_ends: '',
+        vacation_price: ''
+      };
+      
       if (!vacationForm.country_id) {
-        setError('חובה לבחור מדינה');
-        return;
+        newFieldErrors.country_id = 'חובה לבחור מדינה';
+        hasErrors = true;
       }
       if (!vacationForm.vacation_description.trim()) {
-        setError('חובה למלא תיאור החופשה');
-        return;
+        newFieldErrors.vacation_description = 'חובה למלא תיאור החופשה';
+        hasErrors = true;
       }
       if (!vacationForm.vacation_start) {
-        setError('חובה לבחור תאריך התחלה');
-        return;
+        newFieldErrors.vacation_start = 'חובה לבחור תאריך התחלה';
+        hasErrors = true;
       }
       if (!vacationForm.vacation_ends) {
-        setError('חובה לבחור תאריך סיום');
-        return;
+        newFieldErrors.vacation_ends = 'חובה לבחור תאריך סיום';
+        hasErrors = true;
       }
       if (!vacationForm.vacation_price || vacationForm.vacation_price <= 0) {
-        setError('חובה למלא מחיר חיובי');
+        newFieldErrors.vacation_price = 'חובה למלא מחיר חיובי';
+        hasErrors = true;
+      }
+      
+      if (hasErrors) {
+        setFieldErrors(newFieldErrors);
         return;
       }
       
       setLoading(true);
-      setError(''); // נקה שגיאות קודמות
       
       // אם יש קובץ נבחר, העלה אותו קודם
       if (selectedFile) {
@@ -230,6 +262,13 @@ const Admin = () => {
         vacation_file_name: ''
       });
       setSelectedFile(null);
+      setFieldErrors({
+        country_id: '',
+        vacation_description: '',
+        vacation_start: '',
+        vacation_ends: '',
+        vacation_price: ''
+      });
       fetchVacations();
     } catch (err) {
       if (err.message) {
@@ -268,34 +307,63 @@ const Admin = () => {
     });
     setEditSelectedFile(null);
     setEditVacationDialog(true);
+    setFieldErrors({
+      country_id: '',
+      vacation_description: '',
+      vacation_start: '',
+      vacation_ends: '',
+      vacation_price: ''
+    });
   };
 
   const handleUpdateVacation = async () => {
     try {
+      // נקה שגיאות קודמות
+      setFieldErrors({
+        country_id: '',
+        vacation_description: '',
+        vacation_start: '',
+        vacation_ends: '',
+        vacation_price: ''
+      });
+      
       // ולידציה
+      let hasErrors = false;
+      const newFieldErrors = {
+        country_id: '',
+        vacation_description: '',
+        vacation_start: '',
+        vacation_ends: '',
+        vacation_price: ''
+      };
+      
       if (!editVacationForm.country_id) {
-        setError('חובה לבחור מדינה');
-        return;
+        newFieldErrors.country_id = 'חובה לבחור מדינה';
+        hasErrors = true;
       }
       if (!editVacationForm.vacation_description.trim()) {
-        setError('חובה למלא תיאור החופשה');
-        return;
+        newFieldErrors.vacation_description = 'חובה למלא תיאור החופשה';
+        hasErrors = true;
       }
       if (!editVacationForm.vacation_start) {
-        setError('חובה לבחור תאריך התחלה');
-        return;
+        newFieldErrors.vacation_start = 'חובה לבחור תאריך התחלה';
+        hasErrors = true;
       }
       if (!editVacationForm.vacation_ends) {
-        setError('חובה לבחור תאריך סיום');
-        return;
+        newFieldErrors.vacation_ends = 'חובה לבחור תאריך סיום';
+        hasErrors = true;
       }
       if (!editVacationForm.vacation_price || editVacationForm.vacation_price <= 0) {
-        setError('חובה למלא מחיר חיובי');
+        newFieldErrors.vacation_price = 'חובה למלא מחיר חיובי';
+        hasErrors = true;
+      }
+      
+      if (hasErrors) {
+        setFieldErrors(newFieldErrors);
         return;
       }
       
       setLoading(true);
-      setError(''); // נקה שגיאות קודמות
       
       let updatedForm = { ...editVacationForm };
       
@@ -317,6 +385,13 @@ const Admin = () => {
         vacation_file_name: ''
       });
       setEditSelectedFile(null);
+      setFieldErrors({
+        country_id: '',
+        vacation_description: '',
+        vacation_start: '',
+        vacation_ends: '',
+        vacation_price: ''
+      });
       fetchVacations();
     } catch (err) {
       if (err.message) {
@@ -401,10 +476,26 @@ const Admin = () => {
       await banUser(selectedUser.user_id, banForm);
       setBanDialog(false);
       fetchUsers();
+      setSuccessMessage('המשתמש הורחק בהצלחה');
     } catch (err) {
       setError('שגיאה בהרחקת המשתמש');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUnbanUser = async (userId) => {
+    if (window.confirm('האם אתה בטוח שברצונך לבטל את הרחקת המשתמש?')) {
+      try {
+        setLoading(true);
+        await unbanUser(userId);
+        fetchUsers();
+        setSuccessMessage('הרחקת המשתמש בוטלה בהצלחה');
+      } catch (err) {
+        setError('שגיאה בביטול הרחקת המשתמש');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -498,6 +589,13 @@ const Admin = () => {
                 onClick={() => {
                 setAddVacationDialog(true);
                 setError('');
+                setFieldErrors({
+                  country_id: '',
+                  vacation_description: '',
+                  vacation_start: '',
+                  vacation_ends: '',
+                  vacation_price: ''
+                });
                 setSuccessMessage('');
               }}
               >
@@ -634,13 +732,25 @@ const Admin = () => {
                           >
                             <Delete />
                           </IconButton>
-                          <IconButton 
-                            size="small" 
-                            color="warning"
-                            onClick={() => handleBanUser(user)}
-                          >
-                            <Block />
-                          </IconButton>
+                          {user.is_banned ? (
+                            <IconButton 
+                              size="small" 
+                              color="success"
+                              onClick={() => handleUnbanUser(user.user_id)}
+                              title="בטל הרחקה"
+                            >
+                              <Block />
+                            </IconButton>
+                          ) : (
+                            <IconButton 
+                              size="small" 
+                              color="warning"
+                              onClick={() => handleBanUser(user)}
+                              title="הרחק משתמש"
+                            >
+                              <Block />
+                            </IconButton>
+                          )}
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -653,17 +763,31 @@ const Admin = () => {
       )}
 
       {/* דיאלוג הוספת חופשה */}
-      <Dialog open={addVacationDialog} onClose={() => setAddVacationDialog(false)} maxWidth="md" fullWidth>
+      <Dialog open={addVacationDialog} onClose={() => {
+        setAddVacationDialog(false);
+        setFieldErrors({
+          country_id: '',
+          vacation_description: '',
+          vacation_start: '',
+          vacation_ends: '',
+          vacation_price: ''
+        });
+      }} maxWidth="md" fullWidth>
         <DialogTitle>הוסף חופשה חדשה</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ pt: 2 }}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!fieldErrors.country_id}>
                 <InputLabel>מדינה</InputLabel>
                 <Select
                   value={vacationForm.country_id}
                   label="מדינה"
-                  onChange={(e) => setVacationForm({ ...vacationForm, country_id: e.target.value })}
+                  onChange={(e) => {
+                    setVacationForm({ ...vacationForm, country_id: e.target.value });
+                    if (fieldErrors.country_id) {
+                      setFieldErrors(prev => ({ ...prev, country_id: '' }));
+                    }
+                  }}
                 >
                   {countries.map((country) => (
                     <MenuItem key={country.country_id} value={country.country_id}>
@@ -671,6 +795,11 @@ const Admin = () => {
                     </MenuItem>
                   ))}
                 </Select>
+                {fieldErrors.country_id && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                    {fieldErrors.country_id}
+                  </Typography>
+                )}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12 }}>
@@ -678,11 +807,22 @@ const Admin = () => {
                 fullWidth
                 label="תיאור החופשה"
                 value={vacationForm.vacation_description}
-                onChange={(e) => setVacationForm({ ...vacationForm, vacation_description: e.target.value })}
+                onChange={(e) => {
+                  setVacationForm({ ...vacationForm, vacation_description: e.target.value });
+                  if (fieldErrors.vacation_description) {
+                    setFieldErrors(prev => ({ ...prev, vacation_description: '' }));
+                  }
+                }}
                 variant="outlined"
                 multiline
                 rows={3}
+                error={!!fieldErrors.vacation_description}
               />
+              {fieldErrors.vacation_description && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_description}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -690,10 +830,21 @@ const Admin = () => {
                 label="תאריך התחלה"
                 type="date"
                 value={vacationForm.vacation_start}
-                onChange={(e) => setVacationForm({ ...vacationForm, vacation_start: e.target.value })}
+                onChange={(e) => {
+                  setVacationForm({ ...vacationForm, vacation_start: e.target.value });
+                  if (fieldErrors.vacation_start) {
+                    setFieldErrors(prev => ({ ...prev, vacation_start: '' }));
+                  }
+                }}
                 variant="outlined"
                 InputLabelProps={{ shrink: true }}
+                error={!!fieldErrors.vacation_start}
               />
+              {fieldErrors.vacation_start && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_start}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -701,10 +852,21 @@ const Admin = () => {
                 label="תאריך סיום"
                 type="date"
                 value={vacationForm.vacation_ends}
-                onChange={(e) => setVacationForm({ ...vacationForm, vacation_ends: e.target.value })}
+                onChange={(e) => {
+                  setVacationForm({ ...vacationForm, vacation_ends: e.target.value });
+                  if (fieldErrors.vacation_ends) {
+                    setFieldErrors(prev => ({ ...prev, vacation_ends: '' }));
+                  }
+                }}
                 variant="outlined"
                 InputLabelProps={{ shrink: true }}
+                error={!!fieldErrors.vacation_ends}
               />
+              {fieldErrors.vacation_ends && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_ends}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -712,9 +874,20 @@ const Admin = () => {
                 label="מחיר"
                 type="number"
                 value={vacationForm.vacation_price}
-                onChange={(e) => setVacationForm({ ...vacationForm, vacation_price: e.target.value })}
+                onChange={(e) => {
+                  setVacationForm({ ...vacationForm, vacation_price: e.target.value });
+                  if (fieldErrors.vacation_price) {
+                    setFieldErrors(prev => ({ ...prev, vacation_price: '' }));
+                  }
+                }}
                 variant="outlined"
+                error={!!fieldErrors.vacation_price}
               />
+              {fieldErrors.vacation_price && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_price}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <input
@@ -862,17 +1035,31 @@ const Admin = () => {
       </Dialog>
 
       {/* דיאלוג עריכת חופשה */}
-      <Dialog open={editVacationDialog} onClose={() => setEditVacationDialog(false)} maxWidth="md" fullWidth>
+      <Dialog open={editVacationDialog} onClose={() => {
+        setEditVacationDialog(false);
+        setFieldErrors({
+          country_id: '',
+          vacation_description: '',
+          vacation_start: '',
+          vacation_ends: '',
+          vacation_price: ''
+        });
+      }} maxWidth="md" fullWidth>
         <DialogTitle>ערוך חופשה</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ pt: 2 }}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!fieldErrors.country_id}>
                 <InputLabel>מדינה</InputLabel>
                 <Select
                   value={editVacationForm.country_id}
                   label="מדינה"
-                  onChange={(e) => setEditVacationForm({ ...editVacationForm, country_id: e.target.value })}
+                  onChange={(e) => {
+                    setEditVacationForm({ ...editVacationForm, country_id: e.target.value });
+                    if (fieldErrors.country_id) {
+                      setFieldErrors(prev => ({ ...prev, country_id: '' }));
+                    }
+                  }}
                 >
                   {countries.map((country) => (
                     <MenuItem key={country.country_id} value={country.country_id}>
@@ -880,6 +1067,11 @@ const Admin = () => {
                     </MenuItem>
                   ))}
                 </Select>
+                {fieldErrors.country_id && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                    {fieldErrors.country_id}
+                  </Typography>
+                )}
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12 }}>
@@ -887,11 +1079,22 @@ const Admin = () => {
                 fullWidth
                 label="תיאור החופשה"
                 value={editVacationForm.vacation_description}
-                onChange={(e) => setEditVacationForm({ ...editVacationForm, vacation_description: e.target.value })}
+                onChange={(e) => {
+                  setEditVacationForm({ ...editVacationForm, vacation_description: e.target.value });
+                  if (fieldErrors.vacation_description) {
+                    setFieldErrors(prev => ({ ...prev, vacation_description: '' }));
+                  }
+                }}
                 variant="outlined"
                 multiline
                 rows={3}
+                error={!!fieldErrors.vacation_description}
               />
+              {fieldErrors.vacation_description && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_description}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -899,10 +1102,21 @@ const Admin = () => {
                 label="תאריך התחלה"
                 type="date"
                 value={editVacationForm.vacation_start}
-                onChange={(e) => setEditVacationForm({ ...editVacationForm, vacation_start: e.target.value })}
+                onChange={(e) => {
+                  setEditVacationForm({ ...editVacationForm, vacation_start: e.target.value });
+                  if (fieldErrors.vacation_start) {
+                    setFieldErrors(prev => ({ ...prev, vacation_start: '' }));
+                  }
+                }}
                 variant="outlined"
                 InputLabelProps={{ shrink: true }}
+                error={!!fieldErrors.vacation_start}
               />
+              {fieldErrors.vacation_start && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_start}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -910,10 +1124,21 @@ const Admin = () => {
                 label="תאריך סיום"
                 type="date"
                 value={editVacationForm.vacation_ends}
-                onChange={(e) => setEditVacationForm({ ...editVacationForm, vacation_ends: e.target.value })}
+                onChange={(e) => {
+                  setEditVacationForm({ ...editVacationForm, vacation_ends: e.target.value });
+                  if (fieldErrors.vacation_ends) {
+                    setFieldErrors(prev => ({ ...prev, vacation_ends: '' }));
+                  }
+                }}
                 variant="outlined"
                 InputLabelProps={{ shrink: true }}
+                error={!!fieldErrors.vacation_ends}
               />
+              {fieldErrors.vacation_ends && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_ends}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -921,9 +1146,20 @@ const Admin = () => {
                 label="מחיר"
                 type="number"
                 value={editVacationForm.vacation_price}
-                onChange={(e) => setEditVacationForm({ ...editVacationForm, vacation_price: e.target.value })}
+                onChange={(e) => {
+                  setEditVacationForm({ ...editVacationForm, vacation_price: e.target.value });
+                  if (fieldErrors.vacation_price) {
+                    setFieldErrors(prev => ({ ...prev, vacation_price: '' }));
+                  }
+                }}
                 variant="outlined"
+                error={!!fieldErrors.vacation_price}
               />
+              {fieldErrors.vacation_price && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                  {fieldErrors.vacation_price}
+                </Typography>
+              )}
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <input
