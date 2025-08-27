@@ -1,0 +1,55 @@
+.card {
+    max-width: 345px;
+    margin: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.title.completed {
+    text-decoration: line-through;
+    color: #666;
+}
+
+.title.pending {
+    text-decoration: none;
+    color: #333;
+}
+
+.description {
+    text-align: center;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.description.completed {
+    text-decoration: line-through;
+}
+
+.description.pending {
+    text-decoration: none;
+}
+
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.checkbox {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.label {
+    font-size: 0.875rem;
+    color: #666;
+    cursor: pointer;
+}
