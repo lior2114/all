@@ -1,0 +1,51 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBKF5sKADsYua8HUMJ0AqAb0bwOLk3PLAU",
+  authDomain: "my-first-firebase-c20bd.firebaseapp.com",
+  projectId: "my-first-firebase-c20bd",
+  storageBucket: "my-first-firebase-c20bd.firebasestorage.app",
+  messagingSenderId: "352994611491",
+  appId: "1:352994611491:web:f5d6ed83ff2f0ae157bc96"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app); // יוצר אובייקט Authentication של Firebase - זה המנגנון שמטפל בכל פעולות הזיהוי והאימות במערכת כמו רישום משתמשים חדשים, כניסה למערכת, יציאה, ניהול סיסמאות ועוד
+
+export async function registerUser(email, password) {
+    try {
+      return await createUserWithEmailAndPassword(auth, email, password);
+        
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export async function loginUser(email, password) {
+    try {
+        return await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export async function logoutUser() {
+    try {
+        await signOut(auth);
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export function onAuthChange(callback) {
+    return onAuthStateChanged(auth, callback);
+}

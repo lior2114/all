@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  max-width: 420px;
+  width: 100%;
+  margin: 24px auto;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+}
+
