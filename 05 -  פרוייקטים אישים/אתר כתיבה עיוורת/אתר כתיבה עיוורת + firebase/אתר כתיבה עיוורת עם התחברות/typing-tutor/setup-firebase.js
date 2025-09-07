@@ -10,12 +10,7 @@ import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDnlfZF01rKU6h80hsoxKTcWvl3Xcq81uk",
-  authDomain: "typing-website-44c98.firebaseapp.com",
-  projectId: "typing-website-44c98",
-  storageBucket: "typing-website-44c98.firebasestorage.app",
-  messagingSenderId: "683451576727",
-  appId: "1:683451576727:web:7c6da6622588dbd17dd4d2",
+
 };
 
 console.log('🔥 Firebase Setup Helper');
