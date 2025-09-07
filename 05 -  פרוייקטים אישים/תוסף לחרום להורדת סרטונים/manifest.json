@@ -1,0 +1,32 @@
+{
+  "name": "Quick Video Downloader (Non-DRM)",
+  "description": "Detects downloadable HTML5 video sources on a page and lets you save them. Does not bypass DRM or protected streams.",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "permissions": [
+    "downloads",
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_title": "Video Downloader",
+    "default_popup": "popup.html"
+  }
+}
+
+

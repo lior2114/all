@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>QVD Controls</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 12px; }
+    .row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; }
+    label { font-size: 14px; }
+    input[type="checkbox"] { width: 18px; height: 18px; }
+    .hint { color: #666; font-size: 12px; }
+  </style>
+  <script src="popup.js" defer></script>
+  </head>
+<body>
+  <div class="row">
+    <label for="enableSite">Enable on this site</label>
+    <input id="enableSite" type="checkbox" />
+  </div>
+  <div class="hint">Hide or show buttons injected on videos for this site.</div>
+
+  <hr />
+  <div class="row">
+    <label for="delayStart">Delay recording start by 3s</label>
+    <input id="delayStart" type="checkbox" />
+  </div>
+  <div class="hint">Useful for avoiding black frames when overlays appear at start.</div>
+
+  <hr />
+  <div class="row">
+    <button id="reload">Reload page</button>
+  </div>
+</body>
+</html>
+
+
