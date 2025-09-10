@@ -369,9 +369,9 @@ export function Vacations() {
                       color: '#ffffff', // always white text on date bar in both modes
                       background: theme.palette.mode === 'dark'
                         ? 'linear-gradient(135deg, #0f172a, #1f2937)'
-                        : 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                        : 'linear-gradient(135deg,rgb(249, 251, 255),rgb(118, 42, 248))', 
                       textShadow: '0 1px 2px rgba(0,0,0,0.45)',
-                      boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.08), 0 4px 10px rgba(0,0,0,0.25)'
+                      boxShadow: 'inset 0 -1px 0 rgba(250, 241, 241, 0.08), 0 4px 10px rgba(0,0,0,0.25)',
                     }}
                   >
                     <CalendarToday fontSize="small" />

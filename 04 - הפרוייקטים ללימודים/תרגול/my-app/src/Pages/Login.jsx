@@ -1,15 +1,20 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useUser } from "../Contexts/userContext"
 import { Link, useNavigate } from 'react-router-dom';
 
 export function Login(){
 
-    const {login, error, cleanError} = useUser()
+    const {login, error, cleanError, setError} = useUser()
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: "",
         password: ""
-    })    
+    })
+
+    // נקה שגיאות כשנכנסים לדף
+    useEffect(() => {
+        cleanError()
+    }, [])    
     
     const handleChange = (e) => {
         setFormData({
@@ -21,6 +26,13 @@ export function Login(){
     const handlelogin = async(e) =>{
         e.preventDefault()
         cleanError()
+        
+        // Validate form data
+        if (!formData.email || !formData.password) {
+            setError("Please fill in all fields");
+            return;
+        }
+        
         try{
             await login(formData)
             navigate("/")
@@ -41,6 +53,7 @@ export function Login(){
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                required
             />
             <label>Password:</label>
             <input 
@@ -48,6 +61,7 @@ export function Login(){
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                required
             />
             <button type="submit">Login</button>
             {error && <p style={{color: 'red'}}>{error}</p>}

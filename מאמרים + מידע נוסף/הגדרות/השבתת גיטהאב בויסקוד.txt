@@ -1,6 +1,0 @@
-1. השבתת אינטגרציית Git ב-VS Code:
-פתח את הגדרות (Settings) ב-VS Code:
-לחץ על Ctrl + , (או עבור לתפריט File > Preferences > Settings).
-חפש את ההגדרה: git.enabled.
-בטל את הסימון (Uncheck) של האפשרות Git: Enabled.
-זה ישבית את האינטגרציה של Git ב-VS Code, והאותיות לא יופיעו יותר.

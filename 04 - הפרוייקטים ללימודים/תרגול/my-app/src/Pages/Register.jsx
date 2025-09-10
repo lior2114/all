@@ -1,16 +1,21 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useUser } from "../Contexts/userContext"
 import { Link, useNavigate } from 'react-router-dom';
 
 export function Register(){
 
-    const {register, error, cleanError} = useUser()
+    const {register, error, cleanError, setError} = useUser()
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "",
         email: "",
         password: ""
-    })    
+    })
+
+    // נקה שגיאות כשנכנסים לדף
+    useEffect(() => {
+        cleanError()
+    }, [])    
     
     const handleChange = (e) => {
         setFormData({
@@ -21,7 +26,12 @@ export function Register(){
 
     const handleRegister = async(e) =>{
         e.preventDefault()// עוצר את ה-refresh של הדף
-        cleanError()//ואז מכאן זה ירוץ
+        cleanError()
+        // Validate form data
+            if (!formData.email || !formData.password|| !formData.username) {
+                setError("Please fill in all fields");
+                return;
+            }
         try{
             await register(formData)
             navigate("/")

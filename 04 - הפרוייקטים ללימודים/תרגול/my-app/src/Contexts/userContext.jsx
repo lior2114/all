@@ -99,7 +99,8 @@ export const UserProvider = ({children}) => {
     const values = {
         user,
         loading,
-        error, 
+        error,
+        setError, 
         login,
         register,
         logout,

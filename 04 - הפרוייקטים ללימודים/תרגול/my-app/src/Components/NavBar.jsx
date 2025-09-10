@@ -1,8 +1,10 @@
 import { useUser } from "../Contexts/userContext"
 import { useNavigate, useLocation } from 'react-router-dom';
 
+
 export function NavBar(){
     const navigate = useNavigate()
+    const { user, logout } = useUser()
     return(
         <>
         <div>
@@ -13,10 +15,8 @@ export function NavBar(){
             <button 
             onClick={() => navigate("/About")}
             >About</button>
-            <button 
-            onClick={() => navigate("/Login")}
-            >Login</button>
-            
+
+        {user? <button onClick={logout}>Logout</button> : <button onClick={() => navigate("/Login")}>Login</button>}    
         </div>
         </>
     )
