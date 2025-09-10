@@ -1,0 +1,15 @@
+התחלת דוקר יוצרים תמונה 
+docker build -t "username"/"name i want":1.0 .
+לא לשכוח את הנקודה בסוף
+
+יצירת קונטיינר שבו נפעיל את התמונה: 
+docker create --name "name you will call the container" "username"/"name of the image you create before":1.0
+
+ואם רוצים לעלות לענן
+docker push "username"/"name of the image":1.0 
+
+משיכה מהענן למחשב:
+docker pull "username"/"name of the image":1.0
+
+עלית הקובץ ישירות מה compose:
+docker compose push 

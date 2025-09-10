@@ -1,0 +1,19 @@
+#without docker-compose, we need to write flowing commands-terminal
+#1. docker build -t colors-image .
+#2./docker create --name colors-container colors-image
+#3. docker start colors-container
+
+#docker-compose version 3.8
+version: '3.8'
+
+services:
+#container name
+#colorama server (aplication)
+  color-service:
+    image: zscyzscy/color-cmd
+
+    #where is the location of the docker file
+    build: .
+
+    #container name
+    container_name: color-service

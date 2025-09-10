@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  zscy-app:
+    image: zscyzscy/zscy-app:1.0
+    build: .
+    container_name: zscy-app
+ 

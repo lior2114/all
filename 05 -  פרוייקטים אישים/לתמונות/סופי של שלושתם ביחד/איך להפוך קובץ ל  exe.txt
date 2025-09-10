@@ -1,0 +1,5 @@
+pip install pyinstaller
+
+pyinstaller --onefile --noconsole "image_processor_app.py" 
+
+pyinstaller image_processor_app.spec

@@ -1,0 +1,26 @@
+/* Feature Card Component Styles */
+.featureCard {
+  padding: 32px;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.featureIcon {
+  font-size: 60px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.featureTitle {
+  margin-bottom: 16px;
+}
+
+.featureDescription {
+  color: var(--text-secondary);
+}

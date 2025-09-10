@@ -1,0 +1,207 @@
+/* Vacations Page Styles */
+.vacationsContainer {
+  margin-top: 32px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vacationsTitle {
+  margin: 0;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorAlert {
+  margin-bottom: 16px;
+}
+
+.loadingContainer {
+  padding: 32px;
+  text-align: center;
+}
+
+.emptyContainer {
+  padding: 32px;
+  text-align: center;
+}
+
+.vacationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.vacationCard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.vacationImageContainer {
+  position: relative;
+}
+
+.vacationImage {
+  object-fit: cover;
+  width: 100%;
+  height: 180px;
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%);
+}
+
+.lightModeOverlay {
+  background: linear-gradient(180deg, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.65) 100%);
+}
+
+.likeButton {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  text-transform: none;
+  padding: 4px 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  font-size: 0.9rem;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+  border: 1.2px solid rgba(255,255,255,0.9);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+  backdrop-filter: saturate(140%) blur(2px);
+}
+
+.likeButton:hover {
+  background: linear-gradient(135deg, #2196f3, #22d3ee);
+}
+
+.lightModeLikeButton {
+  background: linear-gradient(135deg, #0b5ed7, #0077b6);
+  border: 1.2px solid rgba(0,0,0,0.55);
+}
+
+.lightModeLikeButton:hover {
+  background: linear-gradient(135deg, #0a58ca, #00669c);
+}
+
+.adminActions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.adminButton {
+  background-color: rgba(255,255,255,0.85);
+}
+
+.vacationTitle {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  color: white;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+
+.dateBar {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #0f172a, #1f2937);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  box-shadow: inset 0 -1px 0 rgba(250, 241, 241, 0.08), 0 4px 10px rgba(0,0,0,0.25);
+}
+
+.lightModeDateBar {
+  background: linear-gradient(135deg, rgb(249, 251, 255), rgb(118, 42, 248));
+}
+
+.dateText {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.vacationContent {
+  flex-grow: 1;
+}
+
+.vacationDescription {
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  hyphens: auto;
+  color: var(--text-secondary);
+}
+
+.priceButton {
+  font-weight: bold;
+  width: 100%;
+}
+
+.vacationActions {
+  justify-content: flex-end;
+  padding-top: 0;
+  padding-bottom: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.likesCount {
+  margin-left: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Dialog styles */
+.deleteDialog {
+  border-radius: 16px;
+}
+
+.deleteDialogTitle {
+  color: var(--text-primary);
+}
+
+.deleteDialogContent {
+  color: var(--text-secondary);
+}
+
+.deleteDialogActions {
+  gap: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .vacationsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 900px) {
+  .vacationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .vacationsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

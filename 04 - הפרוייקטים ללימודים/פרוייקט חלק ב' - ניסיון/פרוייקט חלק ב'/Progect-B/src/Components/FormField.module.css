@@ -1,0 +1,8 @@
+/* Form Field Component Styles */
+.formField {
+  margin: 16px 0;
+}
+
+.inputAdornment {
+  color: var(--text-secondary);
+}

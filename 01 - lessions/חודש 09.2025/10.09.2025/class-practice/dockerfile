@@ -1,0 +1,19 @@
+FROM python:alpine3.19
+
+ #יצירת תיקיה במערכת ההפעלה הוירטואלית שלנו
+WORKDIR /zscy-app 
+ #יצירת סביבה וירטואלית Python והפעלתה
+RUN python -m venv env
+ENV PATH="/zscy-app/env/bin:$PATH"
+
+ #📥 מעתיקים את קובץ requirements.txt קודם (לצורך cache optimization)
+COPY requirements.txt /zscy-app/
+
+ #📦 מתקינים את החבילות הנדרשות
+RUN pip install -r requirements.txt
+
+ #📥 מעתיקים את שאר הקבצים מהמחשב המקומי (התיקייה הנוכחית עם Dockerfile)
+# אל תוך התיקייה /zscy-app בתוך הקונטיינר.
+# לדוגמה: אם יש לנו zscy-app.py במחשב, הוא יעבור ל־/zscy-app/zscy-app.py בקונטיינר.
+COPY . /zscy-app
+ENTRYPOINT ["python", "zscy-app.py"]

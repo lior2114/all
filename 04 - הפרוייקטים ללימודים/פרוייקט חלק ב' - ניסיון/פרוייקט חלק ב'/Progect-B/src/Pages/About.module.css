@@ -1,0 +1,98 @@
+/* About Page Styles */
+.aboutContainer {
+  margin-top: 32px;
+  margin-bottom: 48px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1200px;
+}
+
+.heroSection {
+  padding: 48px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 32px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 900px;
+}
+
+.heroTitle {
+  color: #7c4dff;
+  margin-bottom: 24px;
+}
+
+.heroSubtitle {
+  margin-bottom: 32px;
+  color: #b8b9c9;
+}
+
+.heroDescription {
+  margin-bottom: 32px;
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.featuresSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  justify-content: center;
+}
+
+.featureGridItem {
+  display: flex;
+}
+
+.featureCard {
+  padding: 32px;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.featureIcon {
+  font-size: 60px;
+  color: #7c4dff;
+  margin-bottom: 16px;
+}
+
+.featureTitle {
+  margin-bottom: 16px;
+}
+
+.featureDescription {
+  color: #b8b9c9;
+}
+
+.additionalInfo {
+  padding: 32px;
+  margin-top: 32px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 900px;
+}
+
+.additionalTitle {
+  color: #7c4dff;
+  margin-bottom: 16px;
+}
+
+.additionalText {
+  margin-bottom: 16px;
+}
+
+/* Responsive adjustments */
+@media (min-width: 900px) {
+  .featuresSection > * {
+    max-width: 33.3333%;
+    flex-basis: 33.3333%;
+  }
+}
