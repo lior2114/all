@@ -1,5 +1,18 @@
 let URL = "http://localhost:5000"
 
+// Auth headers helpers
+const getAuthHeaderOnly = () => {
+    try {
+        const token = localStorage.getItem('token');
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    } catch { return {}; }
+};
+
+const getJsonHeaders = () => ({
+    'Content-Type': 'application/json',
+    ...getAuthHeaderOnly()
+});
+
 export const register = async (userData) => {
     const response = await fetch(`${URL}/users`, {
         method: "POST",
@@ -106,7 +119,7 @@ export const getCountries = async () => {
 export const createCountry = async (country_name) => {
     const response = await fetch(`${URL}/countries`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getJsonHeaders(),
         body: JSON.stringify({ country_name }),
     });
     if (!response.ok) {
@@ -120,7 +133,7 @@ export const deleteVacation = async (vacationId, adminUserId) => {
     const qs = adminUserId ? `?admin_user_id=${encodeURIComponent(adminUserId)}` : '';
     const response = await fetch(`${URL}/vacations/delete/${vacationId}${qs}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: getJsonHeaders(),
     });
     if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -132,6 +145,7 @@ export const deleteVacation = async (vacationId, adminUserId) => {
 export const createVacation = async (formData) => {
     const response = await fetch(`${URL}/vacations`, {
         method: "POST",
+        headers: { ...getAuthHeaderOnly() }, // don't set Content-Type with FormData
         body: formData,
     });
     if (!response.ok) {
@@ -144,6 +158,7 @@ export const createVacation = async (formData) => {
 export const updateVacation = async (vacationId, formData) => {
     const response = await fetch(`${URL}/vacations/update/${vacationId}`, {
         method: "PUT",
+        headers: { ...getAuthHeaderOnly() },
         body: formData,
     });
     if (!response.ok) {
@@ -168,7 +183,7 @@ export const getLikes = async () => {
 export const likeVacation = async ({ user_id, vacation_id }) => {
     const response = await fetch(`${URL}/likes`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getJsonHeaders(),
         body: JSON.stringify({ user_id, vacation_id }),
     });
     if (!response.ok) {
@@ -181,7 +196,7 @@ export const likeVacation = async ({ user_id, vacation_id }) => {
 export const unlikeVacation = async ({ user_id, vacation_id }) => {
     const response = await fetch(`${URL}/likes`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: getJsonHeaders(),
         body: JSON.stringify({ user_id, vacation_id }),
     });
     if (!response.ok) {
@@ -193,7 +208,7 @@ export const unlikeVacation = async ({ user_id, vacation_id }) => {
 
 // Users admin API
 export const getUsers = async () => {
-    const res = await fetch(`${URL}/users`, { method: 'GET' });
+    const res = await fetch(`${URL}/users`, { method: 'GET', headers: getAuthHeaderOnly() });
     if (!res.ok) throw new Error('Failed to fetch users');
     return await res.json();
 }
@@ -201,7 +216,7 @@ export const getUsers = async () => {
 export const updateUser = async (userId, payload) => {
     const res = await fetch(`${URL}/users/${userId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getJsonHeaders(),
         body: JSON.stringify(payload)
     });
     const raw = await res.text();
@@ -214,7 +229,7 @@ export const updateUser = async (userId, payload) => {
 export const deleteUser = async (userId) => {
     const res = await fetch(`${URL}/users/${userId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getJsonHeaders()
     });
     const raw = await res.text();
     if (!res.ok) {
@@ -226,7 +241,7 @@ export const deleteUser = async (userId) => {
 export const banUser = async (userId, { reason, days }) => {
     const res = await fetch(`${URL}/bans/${userId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getJsonHeaders(),
         body: JSON.stringify({ reason, days })
     });
     const raw = await res.text();
@@ -238,7 +253,8 @@ export const banUser = async (userId, { reason, days }) => {
 
 export const unbanUser = async (userId) => {
     const res = await fetch(`${URL}/bans/${userId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaderOnly()
     });
     const raw = await res.text();
     if (!res.ok) {
@@ -248,8 +264,18 @@ export const unbanUser = async (userId) => {
 }
 
 export const checkBan = async (userId) => {
-    const res = await fetch(`${URL}/bans/${userId}`, { method: 'GET' });
+    const res = await fetch(`${URL}/bans/${userId}`, { method: 'GET', headers: getAuthHeaderOnly() });
     if (!res.ok) throw new Error('Failed to check ban');
+    return await res.json();
+}
+
+// Refresh current user data from server
+export const refreshUserData = async () => {
+    const res = await fetch(`${URL}/users/verify_token`, { 
+        method: 'GET', 
+        headers: getAuthHeaderOnly() 
+    });
+    if (!res.ok) throw new Error('Failed to refresh user data');
     return await res.json();
 }
 

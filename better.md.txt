@@ -1,0 +1,32 @@
+אני רוצה שתוסיף בו למטה את הדברים הבאים 
+שלפקוייקט ריאקט יעשה לי את התיקיות הבאות אם אין
+api 
+Contexts
+Components
+Pages 
+ושהמסלול שלהם יהיה
+api -> Contexts -> Components -> Pages
+לכל קובץ שהוא פותח אם צריך עריכת css שיעבוד רק עם styles."שם שמתאים לאותו אירוע"
+וגם
+ולכל קובץ jsx או קובץ אחר שהוא פותח בתוכים 
+  של ה jsxיעשה עוד קובץ שהשם שלו יהיה "שם הקובץ".css.module
+ששם יהיה כל הcss לכל קובץ בנפרד שהוא פותח 
+
+
+ולגבי ה backend 
+אם אני עובד עם sql 
+שיעשה לי את התיקיות הבאות 
+modules
+controller
+routes
+וקובץ של app.py
+
+ושבתיקית ה module יהיה רק את הפתיחת שולחנות ופקודות של הוספה או חיסור מה שצריך 
+וב controller יהיה רק את כל האם אין משהוא אז יהיה אררור עם  request.get_json() וגם שיעבוד עם hashpassword ועם token איפה שצריך כי אני לא יודע אם צריך אותם ב controller או ב module
+ובתיקיית ה routes יהיה רק Blueprint עם הקיראה של הפונקציות מהcontroller עם כותרות בהתאם 
+לדוגמא: 
+@countries_bp.route("/countries/<int:country_id>", methods = ["GET"])
+def show_country_by_id(country_id):
+    return C.show_country_by_id(country_id)
+
+וב app.py יהיה רק קריאה ל module ולroutes  עם יצירת שולחן של כל אחד מהשלוחנות שלי 

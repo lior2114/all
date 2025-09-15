@@ -40,31 +40,5 @@ V.create_table()
 B.create_table()
 L.create_table()
 
-# Create default roles if they don't exist
-roles = R.get_all_roles()
-if not roles or (isinstance(roles, dict) and "Massages" in roles):
-    print("No roles found. Creating default roles...")
-    try:
-        R.create_roles("admin")
-        R.create_roles("user")
-        print("Default roles created: admin (ID: 1), user (ID: 2)")
-    except Exception as e:
-        print(f"Failed to create default roles: {e}")
-
-# Create default admin user if no users exist
-users = U.get_all_users()
-if not users or (isinstance(users, dict) and "Massages" in users):
-    print("No users found. Creating default admin user...")
-    try:
-        U.create_user(
-            first_name="Admin",
-            last_name="User", 
-            user_email="admin@test.com",
-            user_password="admin123"
-        )
-        print("Default admin user created: admin@test.com / admin123")
-    except Exception as e:
-        print(f"Failed to create default user: {e}")
-
 if (__name__ == "__main__"):
     app.run (debug=True, host = "0.0.0.0", port = 5000)

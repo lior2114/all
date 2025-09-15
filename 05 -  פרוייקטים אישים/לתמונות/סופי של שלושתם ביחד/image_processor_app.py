@@ -11,6 +11,20 @@ import time
 # קובץ הגדרות
 CONFIG_FILE_NAME = "image_settings.json"
 
+# פורמטי תמונות נתמכים
+SUPPORTED_IMAGE_EXTENSIONS = [
+    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.tiff', '.tif',
+    '.PNG', '.JPG', '.JPEG', '.GIF', '.BMP', '.WEBP', '.TIFF', '.TIF'
+]
+
+# פורמטי תמונות לבחירת קבצים
+IMAGE_FILE_TYPES = [
+    ("Image files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.webp;*.tiff;*.tif;*.PNG;*.JPG;*.JPEG;*.GIF;*.BMP;*.WEBP;*.TIFF;*.TIF"),
+    ("PNG files", "*.png;*.PNG"),
+    ("JPEG files", "*.jpg;*.jpeg;*.JPG;*.JPEG"),
+    ("All files", "*.*")
+]
+
 class ImageProcessorApp:
     def __init__(self):
         self.root = Tk()
@@ -648,10 +662,7 @@ class ImageProcessorApp:
     def browse_all_overlay(self):
         path = filedialog.askopenfilename(
             title="בחר קובץ שכבת-על לעיבוד כל הקבצים",
-            filetypes=[
-                ("Image files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.PNG;*.JPG;*.JPEG;*.GIF;*.BMP"),
-                ("All files", "*.*")
-            ]
+            filetypes=IMAGE_FILE_TYPES
         )
         if path:
             self.all_overlay_var.set(path)
@@ -659,10 +670,7 @@ class ImageProcessorApp:
     def browse_selected_source(self):
         paths = filedialog.askopenfilenames(
             title="בחר תמונות (Ctrl+Click לבחירה מרובה)",
-            filetypes=[
-                ("Image files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.PNG;*.JPG;*.JPEG;*.GIF;*.BMP"),
-                ("All files", "*.*")
-            ]
+            filetypes=IMAGE_FILE_TYPES
         )
         if paths:
             self.selected_source_var.set(";".join(paths))
@@ -675,10 +683,7 @@ class ImageProcessorApp:
     def browse_selected_overlay(self):
         path = filedialog.askopenfilename(
             title="בחר קובץ שכבת-על לקבצים נבחרים",
-            filetypes=[
-                ("Image files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.PNG;*.JPG;*.JPEG;*.GIF;*.BMP"),
-                ("All files", "*.*")
-            ]
+            filetypes=IMAGE_FILE_TYPES
         )
         if path:
             self.selected_overlay_var.set(path)
@@ -699,9 +704,8 @@ class ImageProcessorApp:
             # Get all files in the directory
             files = [f for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]
             
-            # Filter for image files
-            image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.PNG', '.JPG', '.JPEG', '.GIF', '.BMP']
-            image_files = [f for f in files if any(f.lower().endswith(ext.lower()) for ext in image_extensions)]
+            # Filter for image files using the global constant
+            image_files = [f for f in files if any(f.lower().endswith(ext.lower()) for ext in SUPPORTED_IMAGE_EXTENSIONS)]
             
             if not image_files:
                 self.rename_result_label.config(text="לא נמצאו קבצי תמונה בתיקייה הנבחרת.", fg="red")
@@ -765,7 +769,7 @@ class ImageProcessorApp:
         # ספירת קבצים לעיבוד
         try:
             files = os.listdir(self.all_source_var.get())
-            image_files = [f for f in files if f.endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp'))]
+            image_files = [f for f in files if any(f.lower().endswith(ext.lower()) for ext in SUPPORTED_IMAGE_EXTENSIONS)]
             total_files = len(image_files)
         except:
             total_files = 0
@@ -844,8 +848,8 @@ class ImageProcessorApp:
         try:
             # Get list of files in the source directory
             files = os.listdir(source_directory)
-            # Filter out only image files
-            image_files = [f for f in files if f.endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp'))]
+            # Filter out only image files using the global constant
+            image_files = [f for f in files if any(f.lower().endswith(ext.lower()) for ext in SUPPORTED_IMAGE_EXTENSIONS)]
             # Sort files to ensure consistent numbering
             image_files.sort()
 
@@ -877,7 +881,7 @@ class ImageProcessorApp:
                     continue
 
                 try:
-                    # Open the original image
+                    # Open the original image and convert to RGBA for better format compatibility
                     original_image = Image.open(old_file).convert("RGBA")
 
                     # Calculate the position to paste the overlay image (top-right corner with margins)
@@ -893,8 +897,8 @@ class ImageProcessorApp:
                     # Alpha composite the transparent layer (with the overlay) onto the original image
                     combined_image = Image.alpha_composite(original_image, transparent_layer)
 
-                    # Save the modified image with the new name
-                    combined_image.save(new_file)
+                    # Smart save - preserve original format or convert appropriately
+                    self.save_image_smart(combined_image, new_file, old_file)
                 except Exception as processing_error:
                     print(f"Error processing file {filename}: {processing_error}")
             
@@ -935,7 +939,7 @@ class ImageProcessorApp:
                     continue
 
                 try:
-                    # Open the original image
+                    # Open the original image and convert to RGBA for better format compatibility
                     original_image = Image.open(source_file).convert("RGBA")
 
                     # Calculate the position to paste the overlay image (top-right corner with margins)
@@ -951,8 +955,8 @@ class ImageProcessorApp:
                     # Alpha composite the transparent layer (with the overlay) onto the original image
                     combined_image = Image.alpha_composite(original_image, transparent_layer)
 
-                    # Save the modified image with the new name
-                    combined_image.save(new_file)
+                    # Smart save - preserve original format or convert appropriately
+                    self.save_image_smart(combined_image, new_file, source_file)
                 except Exception as processing_error:
                     print(f"Error processing file {source_file}: {processing_error}")
 
@@ -960,6 +964,47 @@ class ImageProcessorApp:
             print(f"An error occurred: {general_error}")
     
     # פונקציות עזר
+    def save_image_smart(self, image, output_path, original_path):
+        """שמירה חכמה של תמונה עם טיפול בפורמטים מעורבים"""
+        try:
+            # קבלת סיומת הקובץ המקורי
+            original_ext = os.path.splitext(original_path)[1].lower()
+            output_ext = os.path.splitext(output_path)[1].lower()
+            
+            # אם הפורמט המקורי תומך בשקיפות (PNG, GIF, WEBP), נשמור עם שקיפות
+            if original_ext in ['.png', '.gif', '.webp', '.tiff', '.tif']:
+                # שמירה עם שקיפות
+                if output_ext in ['.png', '.gif', '.webp', '.tiff', '.tif']:
+                    image.save(output_path, optimize=True)
+                else:
+                    # המרה לפורמט ללא שקיפות - הוספת רקע לבן
+                    background = Image.new('RGB', image.size, (255, 255, 255))
+                    background.paste(image, mask=image.split()[-1])  # שימוש ב-alpha channel כ-mask
+                    background.save(output_path, optimize=True, quality=95)
+            
+            # אם הפורמט המקורי הוא JPG/JPEG - המרה ל-RGB
+            elif original_ext in ['.jpg', '.jpeg']:
+                if output_ext in ['.jpg', '.jpeg']:
+                    # המרה ל-RGB עם רקע לבן לשמירת איכות
+                    background = Image.new('RGB', image.size, (255, 255, 255))
+                    background.paste(image, mask=image.split()[-1] if len(image.split()) == 4 else None)
+                    background.save(output_path, optimize=True, quality=95)
+                else:
+                    # שמירה בפורמט המבוקש
+                    image.save(output_path, optimize=True)
+            
+            # פורמטים אחרים
+            else:
+                image.save(output_path, optimize=True)
+                
+        except Exception as save_error:
+            print(f"שגיאה בשמירת תמונה {output_path}: {save_error}")
+            # גיבוי - שמירה פשוטה
+            try:
+                image.save(output_path)
+            except:
+                print(f"נכשל גם בשמירה פשוטה של {output_path}")
+
     def save_settings(self, overlay_path, overlay_width, overlay_height, margin_top, margin_right, tab_type="all"):
         """שמירת הגדרות לקובץ JSON עם הפרדה בין טאבים"""
         # ניקוי placeholder אם קיים

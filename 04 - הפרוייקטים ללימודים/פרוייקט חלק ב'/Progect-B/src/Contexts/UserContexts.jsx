@@ -1,5 +1,5 @@
 import { Children, createContext, useContext, useEffect, useState } from "react";
-import { login as loginAPI, register as registerAPI} from "../api/api";
+import { login as loginAPI, register as registerAPI, refreshUserData} from "../api/api";
 
 const UserContexts = createContext();
 
@@ -33,6 +33,10 @@ export const UserProvider = ({children}) => {
                 const parsed = JSON.parse(userData)
                 setUser(parsed)
                 setIsAuthenticated(true)
+                // ensure token is available for protected API calls after refresh
+                if (parsed && parsed.token) {
+                    try { localStorage.setItem('token', parsed.token); } catch {}
+                }
             }
         }catch(err){
             console.error(err)
@@ -49,6 +53,8 @@ export const UserProvider = ({children}) => {
             const response = await loginAPI(getdata)
             console.log(response)
             localStorage.setItem("user", JSON.stringify(response))
+            // store JWT token for Authorization header
+            try { if (response?.token) localStorage.setItem('token', response.token); } catch {}
             setUser(response)
             setIsAuthenticated(true)
             setLoading(false)
@@ -68,9 +74,24 @@ export const UserProvider = ({children}) => {
         try{
             const response = await registerAPI(getdata)
             console.log(response)
+            // Persist user
             localStorage.setItem("user", JSON.stringify(response))
             setUser(response)
             setIsAuthenticated(true)
+            // If backend returned a token on register, store it
+            try { if (response?.token) localStorage.setItem('token', response.token); } catch {}
+            // If no token returned, auto-login to obtain one (needed for protected endpoints like likes)
+            if (!response?.token && getdata?.user_email && getdata?.user_password){
+                try {
+                    const loginResp = await loginAPI({ user_email: getdata.user_email, user_password: getdata.user_password });
+                    localStorage.setItem("user", JSON.stringify(loginResp))
+                    try { if (loginResp?.token) localStorage.setItem('token', loginResp.token); } catch {}
+                    setUser(loginResp)
+                } catch (e) {
+                    // If auto-login fails, continue without token; user can still navigate but protected actions will require login
+                    console.warn('Auto-login after register failed:', e)
+                }
+            }
             setLoading(false)
             return {success:true, user:response}
         }
@@ -84,6 +105,7 @@ export const UserProvider = ({children}) => {
 
     const logout = () => {
         localStorage.removeItem('user');
+        try { localStorage.removeItem('token'); } catch {}
         setUser(null);
         setIsAuthenticated(false);
         setError(null);
@@ -99,12 +121,31 @@ export const UserProvider = ({children}) => {
         setError(null)
     }
 
+    const refreshUser = async () => {
+        try {
+            if (!isAuthenticated) return;
+            const refreshedUser = await refreshUserData();
+            const updatedUserWithToken = { ...refreshedUser, token: user?.token };
+            setUser(updatedUserWithToken);
+            localStorage.setItem("user", JSON.stringify(updatedUserWithToken));
+            return updatedUserWithToken;
+        } catch (error) {
+            console.error('Failed to refresh user data:', error);
+            // If refresh fails due to auth issues, logout
+            if (error.message.includes('401') || error.message.includes('token')) {
+                logout();
+            }
+            throw error;
+        }
+    }
+
     const value = {
         login,
         logout,
         register,
         updatedUser,
         clearError,
+        refreshUser,
         user,
         error,
         isAuthenticated,

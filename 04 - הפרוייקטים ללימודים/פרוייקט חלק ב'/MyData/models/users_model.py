@@ -54,7 +54,7 @@ class Users_Model:
     def get_all_users():
         with Users_Model.get_db_connection() as connection:
             cursor = connection.cursor()
-            sql = '''SELECT users.user_id, users.first_name, users.last_name, users.user_email, users.user_password, roles.role_name
+            sql = '''SELECT users.user_id, users.first_name, users.last_name, users.user_email, users.user_password, users.role_id, roles.role_name
             FROM users
             INNER JOIN roles ON roles.role_id = users.role_id
             '''
@@ -71,7 +71,8 @@ class Users_Model:
                     "last_name":row[2],
                     "user_email":row[3],
                     "user_password":row[4],
-                    "role_id":row[5]
+                    "role_id":row[5],
+                    "role_name":row[6]
                 }
                 for row in users
             ]
@@ -116,6 +117,26 @@ class Users_Model:
                 "user_password":user[4],
                 "role_id":user[5]
             }
+
+    @staticmethod
+    def show_user_by_email(user_email):
+        with Users_Model.get_db_connection() as connection:
+            cursor = connection.cursor()
+            sql = "select * from users where user_email =?"
+            cursor.execute(sql,(user_email,))
+            user = cursor.fetchone()
+            if not user:
+                cursor.close()
+                return None
+            cursor.close()
+            return {
+                "user_id":user[0],
+                "first_name":user[1],
+                "last_name":user[2],
+                "user_email":user[3],
+                "user_password":user[4],
+                "role_id":user[5]
+            }
         
     @staticmethod
     def update_user_by_id(user_id, data):
@@ -128,13 +149,21 @@ class Users_Model:
                 cursor.close()
                 return None
             
-            pair = ""
-            for key,value in data.items():
-                pair += key + "=" + "'" + value + "'" + ","
-            pair = pair [:-1]
+            # Build the SET clause safely using parameterized queries
+            set_clauses = []
+            values = []
+            for key, value in data.items():
+                set_clauses.append(f"{key} = ?")
+                values.append(value)
+            
+            if not set_clauses:
+                cursor.close()
+                return {"Message": "No fields to update"}
+            
             sql = f'''update users 
-                    set {pair} where user_id = ?'''
-            cursor.execute(sql,(user_id ,))
+                    set {', '.join(set_clauses)} where user_id = ?'''
+            values.append(user_id)
+            cursor.execute(sql, values)
             connection.commit()
             cursor.close()
             return {"Message":f"user_id {user_id} has been updated successfully"}
@@ -164,8 +193,8 @@ class Users_Model:
             exists = cursor.fetchone()
             cursor.close()
             if not exists:
-                return True
-            return False
+                return False  # Email does not exist
+            return True  # Email exists
 
     @staticmethod
     def set_role_for_email(user_email, role_id):

@@ -11,6 +11,13 @@ app_analysis = Analysis(
         'PIL._tkinter_finder',
         'PIL.ImageTk',
         'PIL.Image',
+        'PIL.ImageFile',
+        'PIL.JpegImagePlugin',
+        'PIL.PngImagePlugin',
+        'PIL.GifImagePlugin',
+        'PIL.BmpImagePlugin',
+        'PIL.WebPImagePlugin',
+        'PIL.TiffImagePlugin',
         'tkinter.filedialog',
         'tkinter.messagebox',
         'tkinter.ttk'

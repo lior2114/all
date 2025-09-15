@@ -102,7 +102,8 @@ class Vacations_Controller:
                 "vacation_start": form.get("vacation_start", ""),
                 "vacation_ends": form.get("vacation_ends", ""),
                 "vacation_price": float(form.get("vacation_price", 0)),
-                "vacation_file_name": filename or get_default_image(int(form.get("country_id", 0)))
+                "vacation_file_name": filename or get_default_image(int(form.get("country_id", 0))),
+                "vacation_currency": (form.get("currency") or form.get("vacation_currency") or "ILS").strip().upper()
             }
             # Create country if missing and name provided
             cn = form.get("country_name", "").strip()
@@ -171,7 +172,8 @@ class Vacations_Controller:
             vacation_start = data["vacation_start"],
             vacation_ends = data["vacation_ends"],
             vacation_price = data["vacation_price"],
-            vacation_file_name = data["vacation_file_name"]
+            vacation_file_name = data["vacation_file_name"],
+            currency = (data.get("vacation_currency") or data.get("currency") or "ILS").upper()
             )
         return jsonify(result), 201
 
@@ -200,7 +202,7 @@ class Vacations_Controller:
             form = request.form
             file = request.files.get('file')
             data = {}
-            for key in ["country_id", "vacation_description", "vacation_start", "vacation_ends", "vacation_price"]:
+            for key in ["country_id", "vacation_description", "vacation_start", "vacation_ends", "vacation_price", "vacation_currency", "currency"]:
                 if key in form:
                     data[key] = form[key]
             # allow choosing by country_name

@@ -29,18 +29,27 @@ class Vacations_Model:
                 vacation_ends date not null,
                 vacation_price float not null,
                 vacation_file_name text not null,
+                currency text default 'ILS',
                 FOREIGN KEY (country_id) REFERENCES countries(country_id)
                 )'''
             cursor.execute(sql)
+            # Ensure currency column exists for older DBs
+            try:
+                cursor.execute("PRAGMA table_info(vacations)")
+                cols = [row[1] for row in cursor.fetchall()]
+                if 'currency' not in cols:
+                    cursor.execute("ALTER TABLE vacations ADD COLUMN currency text default 'ILS'")
+            except Exception:
+                pass
             connection.commit()
             cursor.close()
 
     @staticmethod
-    def create_vacation(country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name ):
+    def create_vacation(country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name, currency='ILS' ):
         with Vacations_Model.get_db_connection() as connection:
             cursor = connection.cursor()
-            sql = "insert into vacations (country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name) values (?, ?, ?, ?, ?, ?)"
-            cursor.execute(sql,(country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name))
+            sql = "insert into vacations (country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name, currency) values (?, ?, ?, ?, ?, ?, ?)"
+            cursor.execute(sql,(country_id, vacation_description, vacation_start, vacation_ends, vacation_price, vacation_file_name, currency))
             connection.commit()
             vacation_id = cursor.lastrowid
             cursor.close()
@@ -51,14 +60,15 @@ class Vacations_Model:
                 "vacation_start": vacation_start,
                 "vacation_ends": vacation_ends,
                 "vacation_price": vacation_price,
-                "vacation_file_name": vacation_file_name
+                "vacation_file_name": vacation_file_name,
+                "vacation_currency": currency
             }
 
     @staticmethod
     def get_all_vacations():
         with Vacations_Model.get_db_connection() as connection:
             cursor = connection.cursor()
-            sql = '''select vacations.vacation_id, countries.country_name, vacations.vacation_description, vacations.vacation_start, vacations.vacation_ends, vacations.vacation_price, vacations.vacation_file_name
+            sql = '''select vacations.vacation_id, countries.country_name, vacations.vacation_description, vacations.vacation_start, vacations.vacation_ends, vacations.vacation_price, vacations.vacation_file_name, vacations.currency
             from vacations
             inner join countries on vacations.country_id = countries.country_id
             order by vacations.vacation_start asc'''
@@ -76,7 +86,8 @@ class Vacations_Model:
                     "vacation_start":row[3],
                     "vacation_ends":row[4],
                     "vacation_price":row[5],
-                    "vacation_file_name":row[6]
+                    "vacation_file_name":row[6],
+                    "vacation_currency": row[7]
                 }
                 for row in vacations
             ]
@@ -100,7 +111,8 @@ class Vacations_Model:
                     "vacation_start":vacation[3],
                     "vacation_ends":vacation[4],
                     "vacation_price":vacation[5],
-                    "vacation_file_name":vacation[6]
+                    "vacation_file_name":vacation[6],
+                    "vacation_currency": vacation[7] if len(vacation) > 7 else 'ILS'
                 }
         
     @staticmethod 

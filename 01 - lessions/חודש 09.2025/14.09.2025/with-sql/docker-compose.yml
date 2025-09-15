@@ -1,0 +1,25 @@
+# Without docker-compose, we need to write following commands in terminal:
+# 1. docker build -t colors-image .
+# 2. docker create --name colors-container colors-image
+# 3. docker start colors-container
+
+# Docker-compose version 3.8
+version: '3.8'
+
+services:
+  # Container name
+  # Colorama server (application)
+  color-service:
+    image: zscyzscy/sql-file:1.0
+
+    # Where is the location of the Dockerfile
+    build: .
+
+    # Container name
+    container_name: first-sql-service
+    volumes:
+      - log-data:/app/logs
+      - ./Mydb.db:/app/mydb.db
+
+volumes:
+  log-data:
