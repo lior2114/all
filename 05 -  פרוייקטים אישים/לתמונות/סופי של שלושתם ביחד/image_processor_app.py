@@ -25,6 +25,18 @@ IMAGE_FILE_TYPES = [
     ("All files", "*.*")
 ]
 
+# גדלי אוברלי מוכנים מראש
+OVERLAY_PRESETS = [
+    {"name": "קטן מאוד", "size": (50, 50), "desc": "לתמונות קטנות"},
+    {"name": "קטן", "size": (75, 75), "desc": "לוגו דיסקרטי"},
+    {"name": "בינוני קטן", "size": (100, 100), "desc": "סטנדרט קטן"},
+    {"name": "בינוני", "size": (150, 150), "desc": "האידיאלי לרוב התמונות"},
+    {"name": "בינוני גדול", "size": (200, 200), "desc": "בולט ונראה היטב"},
+    {"name": "גדול", "size": (250, 250), "desc": "לתמונות גדולות"},
+    {"name": "גדול מאוד", "size": (300, 300), "desc": "לתמונות ברזולוציה גבוהה"},
+    {"name": "ענק", "size": (400, 400), "desc": "למצגות ופוסטרים"}
+]
+
 class ImageProcessorApp:
     def __init__(self):
         self.root = Tk()
@@ -286,6 +298,92 @@ class ImageProcessorApp:
             self.colors['danger']: '#c0392b'
         }
         return color_map.get(color, color)
+    
+    def apply_overlay_preset(self, preset_data, tab_type="all"):
+        """החלת preset לגודל אוברלי"""
+        width, height = preset_data["size"]
+        
+        if tab_type == "all":
+            if width == -1:  # מצב אוטומטי חכם
+                self.all_width_var.set("AUTO")
+                self.all_height_var.set("AUTO")
+            else:
+                self.all_width_var.set(str(width))
+                self.all_height_var.set(str(height))
+        else:  # selected
+            if width == -1:  # מצב אוטומטי חכם
+                self.selected_width_var.set("AUTO")
+                self.selected_height_var.set("AUTO")
+            else:
+                self.selected_width_var.set(str(width))
+                self.selected_height_var.set(str(height))
+    
+    def get_smart_overlay_size(self, image_width, image_height, scale_multiplier=1.0):
+        """בחירה חכמה של גודל אוברלי לפי גודל התמונה עם מכפיל"""
+        # חישוב שטח התמונה
+        image_area = image_width * image_height
+        
+        # חישוב גודל אוברלי מתאים (5% מהשטח) עם מכפיל
+        base_percentage = 0.05 * scale_multiplier  # 5% כפול המכפיל
+        target_area = image_area * base_percentage
+        target_size = int((target_area ** 0.5))  # שורש השטח = צלע ריבוע
+        
+        # מציאת ה-preset הקרוב ביותר
+        best_preset = None
+        min_difference = float('inf')
+        
+        for preset in OVERLAY_PRESETS:
+            preset_size = preset["size"][0]  # נניח שזה ריבוע
+            difference = abs(preset_size - target_size)
+            
+            if difference < min_difference:
+                min_difference = difference
+                best_preset = preset
+        
+        # וידוא שהאוברלי לא יהיה גדול מדי יחסית לתמונה
+        max_size = min(image_width, image_height) // 2  # מקסימום חצי מהצד הקטן (יותר גמיש עם מכפיל)
+        
+        if best_preset and best_preset["size"][0] > max_size:
+            # מציאת preset קטן יותר
+            for preset in OVERLAY_PRESETS:
+                if preset["size"][0] <= max_size:
+                    best_preset = preset
+                else:
+                    break
+        
+        # אם אין preset מתאים, נחשב גודל מותאם אישית
+        if not best_preset:
+            custom_size = min(target_size, max_size)
+            return (custom_size, custom_size)
+            
+        return best_preset["size"]
+    
+    def analyze_image_brightness(self, image):
+        """ניתוח בהירות התמונה לקביעת סוג האוברלי המתאים"""
+        # המרה לגרייסקייל לחישוב בהירות
+        grayscale = image.convert('L')
+        
+        # חישוב בהירות ממוצעת של האזור שבו יהיה האוברלי (פינה ימנית עליונה)
+        width, height = grayscale.size
+        
+        # דגימת אזור של 20% מהתמונה בפינה הימנית העליונה
+        sample_width = int(width * 0.2)
+        sample_height = int(height * 0.2)
+        
+        # חיתוך האזור הרלוונטי
+        overlay_area = grayscale.crop((
+            width - sample_width, 0,  # מהפינה הימנית העליונה
+            width, sample_height
+        ))
+        
+        # חישוב בהירות ממוצעת (0 = שחור, 255 = לבן)
+        pixels = list(overlay_area.getdata())
+        average_brightness = sum(pixels) / len(pixels)
+        
+        # החזרת סוג האוברלי המתאים
+        # אם הבהירות נמוכה (תמונה כהה) - נשתמש באוברלי בהיר
+        # אם הבהירות גבוהה (תמונה בהירה) - נשתמש באוברלי כהה
+        return "light" if average_brightness < 128 else "dark"
         
     def create_all_files_tab(self):
         """יצירת tab לעיבוד כל הקבצים בתיקייה"""
@@ -378,19 +476,195 @@ class ImageProcessorApp:
         self.create_form_field(form_container, "📅 תאריך:", self.all_date_var, 
                               None, "הזן תאריך (למשל: 2024-01-15)")
         
-        # קובץ שכבת-על
+        # קבצי שכבת-על (רגיל ואדפטיבי)
+        overlay_frame = Frame(form_container, bg=self.colors['white'])
+        overlay_frame.pack(fill='x', pady=4, padx=40)
+        
+        # כותרת
+        Label(overlay_frame, text="🎨 קבצי שכבת-על:", 
+              font=("Arial", 10, "bold"),
+              fg=self.colors['primary'], 
+              bg=self.colors['white']).pack(anchor='e', pady=(0, 5))
+        
+        # אוברלי רגיל (כהה)
         overlay_placeholder = "בחר תמונה לשכבת-על" if not settings["all_files_overlay_path"] else ""
-        self.create_form_field(form_container, "🎨 קובץ שכבת-על:", self.all_overlay_var, 
+        self.create_form_field(overlay_frame, "🌑 אוברלי כהה (לתמונות בהירות):", self.all_overlay_var, 
                               self.browse_all_overlay, overlay_placeholder)
+        
+        # אוברלי בהיר
+        self.all_overlay_light_var = StringVar(value=settings.get("all_files_overlay_light_path", ""))
+        light_placeholder = "בחר תמונה בהירה לשכבת-על" if not settings.get("all_files_overlay_light_path", "") else ""
+        self.create_form_field(overlay_frame, "🌕 אוברלי בהיר (לתמונות כהות):", self.all_overlay_light_var, 
+                              self.browse_all_overlay_light, light_placeholder)
+        
+        # כפתור מצב אדפטיבי
+        adaptive_frame = Frame(overlay_frame, bg=self.colors['white'])
+        adaptive_frame.pack(fill='x', pady=(5, 0))
+        
+        self.all_adaptive_mode = tkinter.BooleanVar(value=settings.get("all_adaptive_mode", False))
+        adaptive_check = tkinter.Checkbutton(adaptive_frame, 
+                                           text="🤖 מצב אדפטיבי - בחירה אוטומטית בין אוברלי בהיר וכהה",
+                                           variable=self.all_adaptive_mode,
+                                           font=("Arial", 9, "bold"),
+                                           fg=self.colors['success'],
+                                           bg=self.colors['white'],
+                                           activebackground=self.colors['white'],
+                                           cursor='hand2')
+        adaptive_check.pack(anchor='e')
+        
+        # כפתורי presets מוכנים מראש - לטאב עיבוד כל הקבצים
+        presets_main_frame = Frame(form_container, bg=self.colors['white'])
+        presets_main_frame.pack(fill='x', pady=8, padx=40)
+        
+        Label(presets_main_frame, text="🎯 גדלי אוברלי מוכנים מראש", 
+              font=("Arial", 11, "bold"), 
+              fg=self.colors['primary'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 5))
+        
+        # כפתור מצב אוטומטי חכם
+        smart_btn = Button(presets_main_frame, 
+                          text="🤖 מצב אוטומטי חכם\nגודל מתאים לכל תמונה", 
+                          command=lambda: self.apply_overlay_preset({"size": (-1, -1)}, "all"),
+                          font=("Arial", 10, "bold"),
+                          bg=self.colors['success'],
+                          fg=self.colors['white'],
+                          relief='solid',
+                          bd=2,
+                          padx=15,
+                          pady=10,
+                          cursor='hand2')
+        smart_btn.pack(anchor='center', pady=(0, 8))
+        
+        # אפקט hover לכפתור חכם
+        def smart_hover_enter(event):
+            smart_btn.config(bg=self.darken_color(self.colors['success']))
+        def smart_hover_leave(event):
+            smart_btn.config(bg=self.colors['success'])
+        smart_btn.bind('<Enter>', smart_hover_enter)
+        smart_btn.bind('<Leave>', smart_hover_leave)
+        
+        # בקרת גודל אוטומטי
+        auto_control_frame = Frame(presets_main_frame, bg=self.colors['white'])
+        auto_control_frame.pack(anchor='center', pady=(0, 8))
+        
+        Label(auto_control_frame, text="🎚️ בקרת גודל אוטומטי:", 
+              font=("Arial", 9, "bold"), 
+              fg=self.colors['primary'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 3))
+        
+        # שקופית גודל
+        size_control_frame = Frame(auto_control_frame, bg=self.colors['white'])
+        size_control_frame.pack(anchor='center')
+        
+        Label(size_control_frame, text="קטן יותר", 
+              font=("Arial", 8), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(side='left', padx=(0, 5))
+        
+        self.all_auto_scale = ttk.Scale(size_control_frame, 
+                                       from_=0.3, to=2.0, 
+                                       orient='horizontal',
+                                       length=150,
+                                       value=1.0)
+        self.all_auto_scale.pack(side='left', padx=5)
+        
+        Label(size_control_frame, text="גדול יותר", 
+              font=("Arial", 8), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(side='left', padx=(5, 0))
+        
+        # תווית ערך נוכחי
+        self.all_scale_value_label = Label(auto_control_frame, text="×1.0", 
+                                          font=("Arial", 9, "bold"), 
+                                          fg=self.colors['secondary'], 
+                                          bg=self.colors['white'])
+        self.all_scale_value_label.pack(anchor='center', pady=(3, 0))
+        
+        # עדכון תווית כשמשנים את הערך
+        def update_all_scale_label(value):
+            self.all_scale_value_label.config(text=f"×{float(value):.1f}")
+        
+        self.all_auto_scale.config(command=update_all_scale_label)
+        
+        # כפתורי קיצור דרך
+        shortcuts_frame = Frame(auto_control_frame, bg=self.colors['white'])
+        shortcuts_frame.pack(anchor='center', pady=(5, 0))
+        
+        shortcut_values = [
+            ("קטן", 0.5, self.colors['gray']),
+            ("רגיל", 1.0, self.colors['secondary']),
+            ("גדול", 1.5, self.colors['warning'])
+        ]
+        
+        for text, value, color in shortcut_values:
+            btn = Button(shortcuts_frame, text=text,
+                        command=lambda v=value: self.all_auto_scale.set(v),
+                        font=("Arial", 7, "bold"),
+                        bg=color, fg=self.colors['white'],
+                        relief='flat', padx=8, pady=2,
+                        cursor='hand2')
+            btn.pack(side='left', padx=2)
+            
+            # אפקט hover
+            def create_shortcut_hover(button, orig_color):
+                def on_enter(e): button.config(bg=self.darken_color(orig_color))
+                def on_leave(e): button.config(bg=orig_color)
+                button.bind('<Enter>', on_enter)
+                button.bind('<Leave>', on_leave)
+            create_shortcut_hover(btn, color)
+        
+        Label(presets_main_frame, text="או בחר גודל קבוע:", 
+              font=("Arial", 9), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 8))
+        
+        # יצירת כפתורי presets בשורות
+        presets_grid = Frame(presets_main_frame, bg=self.colors['white'])
+        presets_grid.pack(anchor='center')
+        
+        for i, preset in enumerate(OVERLAY_PRESETS):
+            row = i // 4  # 4 כפתורים בשורה
+            col = i % 4
+            
+            preset_btn = Button(presets_grid, 
+                              text=f"📐 {preset['name']}\n{preset['size'][0]}×{preset['size'][1]}\n{preset['desc']}", 
+                              command=lambda p=preset: self.apply_overlay_preset(p, "all"),
+                              font=("Arial", 8, "bold"),
+                              bg=self.colors['light'],
+                              fg=self.colors['primary'],
+                              relief='solid',
+                              bd=1,
+                              padx=10,
+                              pady=8,
+                              cursor='hand2',
+                              width=15,
+                              height=3)
+            preset_btn.grid(row=row, column=col, padx=3, pady=3, sticky='ew')
+            
+            # הוספת אפקט hover
+            def create_hover_effect(btn):
+                def on_enter(event):
+                    btn.config(bg=self.colors['secondary'], fg=self.colors['white'])
+                def on_leave(event):
+                    btn.config(bg=self.colors['light'], fg=self.colors['primary'])
+                btn.bind('<Enter>', on_enter)
+                btn.bind('<Leave>', on_leave)
+            
+            create_hover_effect(preset_btn)
         
         # הגדרות גודל וריווח - פריסה מסודרת
         settings_frame = Frame(form_container, bg=self.colors['white'])
         settings_frame.pack(fill='x', pady=8, padx=40)
         
-        Label(settings_frame, text="⚙️ הגדרות שכבת-על", 
+        Label(settings_frame, text="⚙️ הגדרות מתקדמות (עריכה ידנית)", 
               font=("Arial", 11, "bold"), 
               fg=self.colors['primary'], 
-              bg=self.colors['white']).pack(anchor='center', pady=(0, 8))
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 2))
+              
+        Label(settings_frame, text="(עריכה ידנית של גודל וריווח - או השתמש בכפתורים למעלה)", 
+              font=("Arial", 9), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 6))
         
         # גודל וריווח בשורה אחת
         settings_input_frame = Frame(settings_frame, bg=self.colors['white'])
@@ -412,7 +686,7 @@ class ImageProcessorApp:
         Entry(size_inputs, textvariable=self.all_height_var, 
               font=("Arial", 8), width=6, relief='solid', bd=1,
               justify='right').pack(side='right', padx=2)
-        Label(size_inputs, text="גובה:", 
+        Label(size_inputs, text="גובה (px):", 
               font=("Arial", 8), 
               fg=self.colors['dark'], 
               bg=self.colors['white']).pack(side='right')
@@ -420,7 +694,7 @@ class ImageProcessorApp:
         Entry(size_inputs, textvariable=self.all_width_var, 
               font=("Arial", 8), width=6, relief='solid', bd=1,
               justify='right').pack(side='right', padx=(8, 2))
-        Label(size_inputs, text="רוחב:", 
+        Label(size_inputs, text="רוחב (px):", 
               font=("Arial", 8), 
               fg=self.colors['dark'], 
               bg=self.colors['white']).pack(side='right')
@@ -554,19 +828,195 @@ class ImageProcessorApp:
         self.create_form_field(form_container, "📅 תאריך:", self.selected_date_var, 
                               None, "הזן תאריך (למשל: 2024-01-15)")
         
-        # קובץ שכבת-על
+        # קבצי שכבת-על (רגיל ואדפטיבי)
+        selected_overlay_frame = Frame(form_container, bg=self.colors['white'])
+        selected_overlay_frame.pack(fill='x', pady=4, padx=40)
+        
+        # כותרת
+        Label(selected_overlay_frame, text="🎨 קבצי שכבת-על:", 
+              font=("Arial", 10, "bold"),
+              fg=self.colors['primary'], 
+              bg=self.colors['white']).pack(anchor='e', pady=(0, 5))
+        
+        # אוברלי רגיל (כהה)
         overlay_placeholder = "בחר תמונה לשכבת-על" if not settings["selected_files_overlay_path"] else ""
-        self.create_form_field(form_container, "🎨 קובץ שכבת-על:", self.selected_overlay_var, 
+        self.create_form_field(selected_overlay_frame, "🌑 אוברלי כהה (לתמונות בהירות):", self.selected_overlay_var, 
                               self.browse_selected_overlay, overlay_placeholder)
+        
+        # אוברלי בהיר
+        self.selected_overlay_light_var = StringVar(value=settings.get("selected_files_overlay_light_path", ""))
+        light_placeholder = "בחר תמונה בהירה לשכבת-על" if not settings.get("selected_files_overlay_light_path", "") else ""
+        self.create_form_field(selected_overlay_frame, "🌕 אוברלי בהיר (לתמונות כהות):", self.selected_overlay_light_var, 
+                              self.browse_selected_overlay_light, light_placeholder)
+        
+        # כפתור מצב אדפטיבי
+        selected_adaptive_frame = Frame(selected_overlay_frame, bg=self.colors['white'])
+        selected_adaptive_frame.pack(fill='x', pady=(5, 0))
+        
+        self.selected_adaptive_mode = tkinter.BooleanVar(value=settings.get("selected_adaptive_mode", False))
+        selected_adaptive_check = tkinter.Checkbutton(selected_adaptive_frame, 
+                                           text="🤖 מצב אדפטיבי - בחירה אוטומטית בין אוברלי בהיר וכהה",
+                                           variable=self.selected_adaptive_mode,
+                                           font=("Arial", 9, "bold"),
+                                           fg=self.colors['success'],
+                                           bg=self.colors['white'],
+                                           activebackground=self.colors['white'],
+                                           cursor='hand2')
+        selected_adaptive_check.pack(anchor='e')
+        
+        # כפתורי presets מוכנים מראש - לטאב עיבוד קבצים נבחרים
+        presets_selected_frame = Frame(form_container, bg=self.colors['white'])
+        presets_selected_frame.pack(fill='x', pady=8, padx=40)
+        
+        Label(presets_selected_frame, text="🎯 גדלי אוברלי מוכנים מראש", 
+              font=("Arial", 11, "bold"), 
+              fg=self.colors['primary'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 5))
+        
+        # כפתור מצב אוטומטי חכם
+        smart_btn_selected = Button(presets_selected_frame, 
+                          text="🤖 מצב אוטומטי חכם\nגודל מתאים לכל תמונה", 
+                          command=lambda: self.apply_overlay_preset({"size": (-1, -1)}, "selected"),
+                          font=("Arial", 10, "bold"),
+                          bg=self.colors['success'],
+                          fg=self.colors['white'],
+                          relief='solid',
+                          bd=2,
+                          padx=15,
+                          pady=10,
+                          cursor='hand2')
+        smart_btn_selected.pack(anchor='center', pady=(0, 8))
+        
+        # אפקט hover לכפתור חכם
+        def smart_selected_hover_enter(event):
+            smart_btn_selected.config(bg=self.darken_color(self.colors['success']))
+        def smart_selected_hover_leave(event):
+            smart_btn_selected.config(bg=self.colors['success'])
+        smart_btn_selected.bind('<Enter>', smart_selected_hover_enter)
+        smart_btn_selected.bind('<Leave>', smart_selected_hover_leave)
+        
+        # בקרת גודל אוטומטי
+        auto_selected_control_frame = Frame(presets_selected_frame, bg=self.colors['white'])
+        auto_selected_control_frame.pack(anchor='center', pady=(0, 8))
+        
+        Label(auto_selected_control_frame, text="🎚️ בקרת גודל אוטומטי:", 
+              font=("Arial", 9, "bold"), 
+              fg=self.colors['primary'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 3))
+        
+        # שקופית גודל
+        size_selected_control_frame = Frame(auto_selected_control_frame, bg=self.colors['white'])
+        size_selected_control_frame.pack(anchor='center')
+        
+        Label(size_selected_control_frame, text="קטן יותר", 
+              font=("Arial", 8), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(side='left', padx=(0, 5))
+        
+        self.selected_auto_scale = ttk.Scale(size_selected_control_frame, 
+                                       from_=0.3, to=2.0, 
+                                       orient='horizontal',
+                                       length=150,
+                                       value=1.0)
+        self.selected_auto_scale.pack(side='left', padx=5)
+        
+        Label(size_selected_control_frame, text="גדול יותר", 
+              font=("Arial", 8), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(side='left', padx=(5, 0))
+        
+        # תווית ערך נוכחי
+        self.selected_scale_value_label = Label(auto_selected_control_frame, text="×1.0", 
+                                          font=("Arial", 9, "bold"), 
+                                          fg=self.colors['warning'], 
+                                          bg=self.colors['white'])
+        self.selected_scale_value_label.pack(anchor='center', pady=(3, 0))
+        
+        # עדכון תווית כשמשנים את הערך
+        def update_selected_scale_label(value):
+            self.selected_scale_value_label.config(text=f"×{float(value):.1f}")
+        
+        self.selected_auto_scale.config(command=update_selected_scale_label)
+        
+        # כפתורי קיצור דרך
+        shortcuts_selected_frame = Frame(auto_selected_control_frame, bg=self.colors['white'])
+        shortcuts_selected_frame.pack(anchor='center', pady=(5, 0))
+        
+        shortcut_selected_values = [
+            ("קטן", 0.5, self.colors['gray']),
+            ("רגיל", 1.0, self.colors['secondary']),
+            ("גדול", 1.5, self.colors['warning'])
+        ]
+        
+        for text, value, color in shortcut_selected_values:
+            btn = Button(shortcuts_selected_frame, text=text,
+                        command=lambda v=value: self.selected_auto_scale.set(v),
+                        font=("Arial", 7, "bold"),
+                        bg=color, fg=self.colors['white'],
+                        relief='flat', padx=8, pady=2,
+                        cursor='hand2')
+            btn.pack(side='left', padx=2)
+            
+            # אפקט hover
+            def create_selected_shortcut_hover(button, orig_color):
+                def on_enter(e): button.config(bg=self.darken_color(orig_color))
+                def on_leave(e): button.config(bg=orig_color)
+                button.bind('<Enter>', on_enter)
+                button.bind('<Leave>', on_leave)
+            create_selected_shortcut_hover(btn, color)
+        
+        Label(presets_selected_frame, text="או בחר גודל קבוע:", 
+              font=("Arial", 9), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 8))
+        
+        # יצירת כפתורי presets בשורות
+        presets_selected_grid = Frame(presets_selected_frame, bg=self.colors['white'])
+        presets_selected_grid.pack(anchor='center')
+        
+        for i, preset in enumerate(OVERLAY_PRESETS):
+            row = i // 4  # 4 כפתורים בשורה
+            col = i % 4
+            
+            preset_btn_selected = Button(presets_selected_grid, 
+                              text=f"📐 {preset['name']}\n{preset['size'][0]}×{preset['size'][1]}\n{preset['desc']}", 
+                              command=lambda p=preset: self.apply_overlay_preset(p, "selected"),
+                              font=("Arial", 8, "bold"),
+                              bg=self.colors['light'],
+                              fg=self.colors['primary'],
+                              relief='solid',
+                              bd=1,
+                              padx=10,
+                              pady=8,
+                              cursor='hand2',
+                              width=15,
+                              height=3)
+            preset_btn_selected.grid(row=row, column=col, padx=3, pady=3, sticky='ew')
+            
+            # הוספת אפקט hover
+            def create_hover_effect_selected(btn):
+                def on_enter(event):
+                    btn.config(bg=self.colors['warning'], fg=self.colors['white'])
+                def on_leave(event):
+                    btn.config(bg=self.colors['light'], fg=self.colors['primary'])
+                btn.bind('<Enter>', on_enter)
+                btn.bind('<Leave>', on_leave)
+            
+            create_hover_effect_selected(preset_btn_selected)
         
         # הגדרות גודל וריווח - פריסה מסודרת
         settings_frame = Frame(form_container, bg=self.colors['white'])
         settings_frame.pack(fill='x', pady=8, padx=40)
         
-        Label(settings_frame, text="⚙️ הגדרות שכבת-על", 
+        Label(settings_frame, text="⚙️ הגדרות מתקדמות (עריכה ידנית)", 
               font=("Arial", 11, "bold"), 
               fg=self.colors['primary'], 
-              bg=self.colors['white']).pack(anchor='center', pady=(0, 8))
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 2))
+              
+        Label(settings_frame, text="(עריכה ידנית של גודל וריווח - או השתמש בכפתורים למעלה)", 
+              font=("Arial", 9), 
+              fg=self.colors['gray'], 
+              bg=self.colors['white']).pack(anchor='center', pady=(0, 6))
         
         # גודל וריווח בשורה אחת
         settings_input_frame = Frame(settings_frame, bg=self.colors['white'])
@@ -588,7 +1038,7 @@ class ImageProcessorApp:
         Entry(size_inputs, textvariable=self.selected_height_var, 
               font=("Arial", 8), width=6, relief='solid', bd=1,
               justify='right').pack(side='right', padx=2)
-        Label(size_inputs, text="גובה:", 
+        Label(size_inputs, text="גובה (px):", 
               font=("Arial", 8), 
               fg=self.colors['dark'], 
               bg=self.colors['white']).pack(side='right')
@@ -596,7 +1046,7 @@ class ImageProcessorApp:
         Entry(size_inputs, textvariable=self.selected_width_var, 
               font=("Arial", 8), width=6, relief='solid', bd=1,
               justify='right').pack(side='right', padx=(8, 2))
-        Label(size_inputs, text="רוחב:", 
+        Label(size_inputs, text="רוחב (px):", 
               font=("Arial", 8), 
               fg=self.colors['dark'], 
               bg=self.colors['white']).pack(side='right')
@@ -688,6 +1138,22 @@ class ImageProcessorApp:
         if path:
             self.selected_overlay_var.set(path)
     
+    def browse_all_overlay_light(self):
+        path = filedialog.askopenfilename(
+            title="בחר קובץ שכבת-על בהיר לעיבוד כל הקבצים",
+            filetypes=IMAGE_FILE_TYPES
+        )
+        if path:
+            self.all_overlay_light_var.set(path)
+    
+    def browse_selected_overlay_light(self):
+        path = filedialog.askopenfilename(
+            title="בחר קובץ שכבת-על בהיר לקבצים נבחרים",
+            filetypes=IMAGE_FILE_TYPES
+        )
+        if path:
+            self.selected_overlay_light_var.set(path)
+    
     # פונקציות עיבוד
     def rename_files_simple(self):
         """שינוי שמות קבצים פשוט - מהקובץ change_name_in_files.py"""
@@ -740,31 +1206,55 @@ class ImageProcessorApp:
     
     def process_all_files(self):
         """עיבוד כל הקבצים - מהקובץ picture_all_file_selected.py"""
+        # בדיקה אם במצב אדפטיבי צריך גם אוברלי בהיר
+        overlay_check = self.all_overlay_var.get()
+        if self.all_adaptive_mode.get():
+            # במצב אדפטיבי צריך גם אוברלי בהיר
+            overlay_check = overlay_check and self.all_overlay_light_var.get()
+        
         if not all([self.all_source_var.get(), self.all_dest_var.get(), self.all_custom_var.get(), 
-                   self.all_date_var.get(), self.all_overlay_var.get()]):
-            self.all_result_label.config(text="⚠️ יש למלא את כל השדות", 
+                   self.all_date_var.get(), overlay_check]):
+            missing_msg = "⚠️ יש למלא את כל השדות"
+            if self.all_adaptive_mode.get() and not self.all_overlay_light_var.get():
+                missing_msg += " (במצב אדפטיבי צריך גם אוברלי בהיר)"
+            self.all_result_label.config(text=missing_msg, 
                                        fg=self.colors['danger'], font=("Arial", 12, "bold"))
             return
         
         # בדיקת תקינות גודל וריווח
         try:
-            width = int(self.all_width_var.get())
-            height = int(self.all_height_var.get())
+            width_str = self.all_width_var.get()
+            height_str = self.all_height_var.get()
+            
+            # בדיקה אם זה מצב אוטומטי
+            if width_str == "AUTO" and height_str == "AUTO":
+                width = -1  # סימון למצב אוטומטי
+                height = -1
+            else:
+                width = int(width_str)
+                height = int(height_str)
+                
+                if width <= 0 or height <= 0:
+                    self.all_result_label.config(text="גודל חייב להיות מספר חיובי", fg="red")
+                    return
+            
             margin_top = int(self.all_margin_top_var.get())
             margin_right = int(self.all_margin_right_var.get())
             
-            if width <= 0 or height <= 0:
-                self.all_result_label.config(text="גודל חייב להיות מספר חיובי", fg="red")
-                return
             if margin_top < 0 or margin_right < 0:
                 self.all_result_label.config(text="ריווח חייב להיות מספר לא שלילי", fg="red")
                 return
         except ValueError:
-            self.all_result_label.config(text="נא להזין מספרים תקינים", fg="red")
+            self.all_result_label.config(text="נא להזין מספרים תקינים או לחץ על כפתור אוטומטי", fg="red")
             return
         
-        # שמירת הגדרות לטאב "כל הקבצים"
-        self.save_settings(self.all_overlay_var.get(), width, height, margin_top, margin_right, "all")
+        # שמירת הגדרות לטאב "כל הקבצים" כולל מצב אדפטיבי
+        overlay_settings = {
+            'overlay_path': self.all_overlay_var.get(),
+            'light_overlay_path': self.all_overlay_light_var.get(),
+            'adaptive_mode': self.all_adaptive_mode.get()
+        }
+        self.save_settings_extended(overlay_settings, width, height, margin_top, margin_right, "all")
         
         # ספירת קבצים לעיבוד
         try:
@@ -777,10 +1267,16 @@ class ImageProcessorApp:
         if total_files > 0:
             # יצירת פונקציית callback לעיבוד
             def process_callback(progress_var, progress_bar, status_label, is_cancelled_func):
+                # העברת נתוני מצב אדפטיבי
+                adaptive_data = {
+                    'enabled': self.all_adaptive_mode.get(),
+                    'light_overlay_path': self.all_overlay_light_var.get() if self.all_adaptive_mode.get() else None
+                }
+                
                 self.rename_images_all(self.all_source_var.get(), self.all_dest_var.get(), 
                                      "ארכיון - תמונה מס' ", self.all_custom_var.get(), self.all_date_var.get(),
                                      self.all_overlay_var.get(), width, height, margin_top, margin_right,
-                                     progress_var, progress_bar, status_label, is_cancelled_func)
+                                     progress_var, progress_bar, status_label, is_cancelled_func, adaptive_data)
             
             # הצגת חלון progress
             cancelled = self.show_progress_window(total_files, process_callback)
@@ -803,21 +1299,31 @@ class ImageProcessorApp:
         
         # בדיקת תקינות גודל וריווח
         try:
-            width = int(self.selected_width_var.get())
-            height = int(self.selected_height_var.get())
+            width_str = self.selected_width_var.get()
+            height_str = self.selected_height_var.get()
+            
+            # בדיקה אם זה מצב אוטומטי
+            if width_str == "AUTO" and height_str == "AUTO":
+                width = -1  # סימון למצב אוטומטי
+                height = -1
+            else:
+                width = int(width_str)
+                height = int(height_str)
+                
+                if width <= 0 or height <= 0:
+                    self.selected_result_label.config(text="⚠️ גודל חייב להיות מספר חיובי", 
+                                                    fg=self.colors['danger'], font=("Arial", 12, "bold"))
+                    return
+            
             margin_top = int(self.selected_margin_top_var.get())
             margin_right = int(self.selected_margin_right_var.get())
             
-            if width <= 0 or height <= 0:
-                self.selected_result_label.config(text="⚠️ גודל חייב להיות מספר חיובי", 
-                                                fg=self.colors['danger'], font=("Arial", 12, "bold"))
-                return
             if margin_top < 0 or margin_right < 0:
                 self.selected_result_label.config(text="⚠️ ריווח חייב להיות מספר לא שלילי", 
                                                 fg=self.colors['danger'], font=("Arial", 12, "bold"))
                 return
         except ValueError:
-            self.selected_result_label.config(text="⚠️ נא להזין מספרים תקינים", 
+            self.selected_result_label.config(text="⚠️ נא להזין מספרים תקינים או לחץ על כפתור אוטומטי", 
                                             fg=self.colors['danger'], font=("Arial", 12, "bold"))
             return
         
@@ -843,7 +1349,7 @@ class ImageProcessorApp:
     # פונקציות עיבוד תמונות (מהקבצים המקוריים)
     def rename_images_all(self, source_directory, destination_directory, base_name, custom_name, date, 
                          overlay_image_path, overlay_width, overlay_height, margin_top, margin_right,
-                         progress_var=None, progress_bar=None, status_label=None, is_cancelled_func=None):
+                         progress_var=None, progress_bar=None, status_label=None, is_cancelled_func=None, adaptive_data=None):
         """עיבוד כל התמונות בתיקייה - מהקובץ picture_all_file_selected.py"""
         try:
             # Get list of files in the source directory
@@ -853,10 +1359,32 @@ class ImageProcessorApp:
             # Sort files to ensure consistent numbering
             image_files.sort()
 
-            # Load the overlay image
-            overlay_image = Image.open(overlay_image_path).convert("RGBA")
-            # Resize the overlay image to the desired size
-            overlay_image = overlay_image.resize((overlay_width, overlay_height))
+            # בדיקה אם זה מצב אדפטיבי
+            is_adaptive_mode = adaptive_data and adaptive_data.get('enabled', False)
+            
+            # טעינת אוברלי בסיסי (כהה)
+            overlay_image_dark = Image.open(overlay_image_path).convert("RGBA")
+            
+            # טעינת אוברלי בהיר אם במצב אדפטיבי
+            overlay_image_light = None
+            if is_adaptive_mode and adaptive_data.get('light_overlay_path'):
+                overlay_image_light = Image.open(adaptive_data['light_overlay_path']).convert("RGBA")
+            
+            # בדיקה אם זה מצב אוטומטי חכם לגודל
+            is_smart_mode = (overlay_width == -1 and overlay_height == -1)
+            
+            if not is_smart_mode:
+                # מצב רגיל - גודל קבוע
+                overlay_image = overlay_image_dark.resize((overlay_width, overlay_height))
+                if overlay_image_light:
+                    overlay_image_light = overlay_image_light.resize((overlay_width, overlay_height))
+                print(f"אוברלי בגודל קבוע: {overlay_width}x{overlay_height} פיקסלים")
+                if is_adaptive_mode:
+                    print("🌗 מצב אדפטיבי - בחירה אוטומטית בין אוברלי בהיר לכהה")
+            else:
+                print("🤖 מצב אוטומטי חכם - גודל אוברלי יותאם לכל תמונה")
+                if is_adaptive_mode:
+                    print("🌗 + מצב אדפטיבי - בחירה אוטומטית בין אוברלי בהיר לכהה")
 
             # Rename each image file
             for index, filename in enumerate(image_files):
@@ -868,7 +1396,12 @@ class ImageProcessorApp:
                 if progress_var and progress_bar and status_label:
                     progress_var.set(f"{index + 1}/{len(image_files)}")
                     progress_bar.config(value=index + 1)
-                    status_label.config(text=f"מעבד: {filename}")
+                    # הצגת גודל התמונה הנוכחית + גודל האוברלי הקבוע
+                    try:
+                        img_info = Image.open(old_file)
+                        status_label.config(text=f"מעבד: {filename} ({img_info.width}x{img_info.height}) + אוברלי קבוע ({overlay_width}x{overlay_height})")
+                    except:
+                        status_label.config(text=f"מעבד: {filename}")
                 
                 # Construct new file name
                 new_name = f"{base_name}{index + 1} - {custom_name} - {date}{os.path.splitext(filename)[1]}"
@@ -883,16 +1416,46 @@ class ImageProcessorApp:
                 try:
                     # Open the original image and convert to RGBA for better format compatibility
                     original_image = Image.open(old_file).convert("RGBA")
+                    
+                    # בחירת סוג האוברלי (בהיר/כהה) אם במצב אדפטיבי
+                    if is_adaptive_mode and overlay_image_light:
+                        brightness_type = self.analyze_image_brightness(original_image)
+                        selected_overlay_base = overlay_image_light if brightness_type == "light" else overlay_image_dark
+                        overlay_type_msg = f"({brightness_type} overlay)"
+                    else:
+                        selected_overlay_base = overlay_image_dark
+                        overlay_type_msg = ""
+                    
+                    # בחירת גודל אוברלי מתאים
+                    if is_smart_mode:
+                        # מצב אוטומטי חכם - חישוב גודל מתאים לתמונה הנוכחית
+                        scale_multiplier = float(self.all_auto_scale.get())
+                        smart_width, smart_height = self.get_smart_overlay_size(
+                            original_image.width, original_image.height, scale_multiplier)
+                        current_overlay = selected_overlay_base.resize((smart_width, smart_height))
+                        print(f"  📐 תמונה {filename} ({original_image.width}x{original_image.height}) → אוברלי {smart_width}x{smart_height} (×{scale_multiplier:.1f}) {overlay_type_msg}")
+                    else:
+                        # מצב רגיל - גודל קבוע
+                        current_overlay = selected_overlay_base.resize((overlay_width, overlay_height)) if is_adaptive_mode else overlay_image
+                        if is_adaptive_mode:
+                            print(f"  🎨 תמונה {filename} → אוברלי {overlay_width}x{overlay_height} {overlay_type_msg}")
 
-                    # Calculate the position to paste the overlay image (top-right corner with margins)
-                    x = original_image.width - overlay_image.width - margin_right
+                    # Calculate the position to paste the overlay image (top-right corner with FIXED margins)
+                    x = original_image.width - current_overlay.width - margin_right
                     y = margin_top
+                    
+                    # וידוא שהאוברלי לא יצא מגבולות התמונה
+                    if x < 0:
+                        x = 0
+                    if y + current_overlay.height > original_image.height:
+                        y = max(0, original_image.height - current_overlay.height)
+                        
                     position = (x, y)
 
                     # Create a transparent layer of the same size as the original image
                     transparent_layer = Image.new('RGBA', original_image.size, (0,0,0,0))
                     # Paste the overlay onto the transparent layer at the calculated position
-                    transparent_layer.paste(overlay_image, position)
+                    transparent_layer.paste(current_overlay, position)
 
                     # Alpha composite the transparent layer (with the overlay) onto the original image
                     combined_image = Image.alpha_composite(original_image, transparent_layer)
@@ -916,9 +1479,17 @@ class ImageProcessorApp:
         """עיבוד תמונות נבחרות - מהקובץ picture_selected.py"""
         try:
             # Load the overlay image once
-            overlay_image = Image.open(overlay_image_path).convert("RGBA")
-            # Resize the overlay image to the desired size
-            overlay_image = overlay_image.resize((overlay_width, overlay_height))
+            overlay_image_original = Image.open(overlay_image_path).convert("RGBA")
+            
+            # בדיקה אם זה מצב אוטומטי חכם
+            is_smart_mode = (overlay_width == -1 and overlay_height == -1)
+            
+            if not is_smart_mode:
+                # מצב רגיל - גודל קבוע
+                overlay_image = overlay_image_original.resize((overlay_width, overlay_height))
+                print(f"אוברלי בגודל קבוע: {overlay_width}x{overlay_height} פיקסלים")
+            else:
+                print("🤖 מצב אוטומטי חכם - גודל אוברלי יותאם לכל תמונה")
 
             # Process each selected file
             for index, source_file in enumerate(source_files):
@@ -941,16 +1512,35 @@ class ImageProcessorApp:
                 try:
                     # Open the original image and convert to RGBA for better format compatibility
                     original_image = Image.open(source_file).convert("RGBA")
+                    
+                    # בחירת גודל אוברלי מתאים
+                    if is_smart_mode:
+                        # מצב אוטומטי חכם - חישוב גודל מתאים לתמונה הנוכחית
+                        scale_multiplier = float(self.selected_auto_scale.get())
+                        smart_width, smart_height = self.get_smart_overlay_size(
+                            original_image.width, original_image.height, scale_multiplier)
+                        current_overlay = overlay_image_original.resize((smart_width, smart_height))
+                        print(f"  📐 תמונה {os.path.basename(source_file)} ({original_image.width}x{original_image.height}) → אוברלי {smart_width}x{smart_height} (×{scale_multiplier:.1f})")
+                    else:
+                        # מצב רגיל - גודל קבוע
+                        current_overlay = overlay_image
 
-                    # Calculate the position to paste the overlay image (top-right corner with margins)
-                    x = original_image.width - overlay_image.width - margin_right
+                    # Calculate the position to paste the overlay image (top-right corner with FIXED margins)
+                    x = original_image.width - current_overlay.width - margin_right
                     y = margin_top
+                    
+                    # וידוא שהאוברלי לא יצא מגבולות התמונה
+                    if x < 0:
+                        x = 0
+                    if y + current_overlay.height > original_image.height:
+                        y = max(0, original_image.height - current_overlay.height)
+                        
                     position = (x, y)
 
                     # Create a transparent layer of the same size as the original image
                     transparent_layer = Image.new('RGBA', original_image.size, (0,0,0,0))
                     # Paste the overlay onto the transparent layer at the calculated position
-                    transparent_layer.paste(overlay_image, position)
+                    transparent_layer.paste(current_overlay, position)
 
                     # Alpha composite the transparent layer (with the overlay) onto the original image
                     combined_image = Image.alpha_composite(original_image, transparent_layer)
@@ -1040,12 +1630,52 @@ class ImageProcessorApp:
                     json.dump(current_settings, file_handler, ensure_ascii=False, indent=2)
             except Exception:
                 print(f"לא ניתן לשמור הגדרות: {error_msg}")
+    
+    def save_settings_extended(self, overlay_settings, overlay_width, overlay_height, margin_top, margin_right, tab_type="all"):
+        """שמירת הגדרות מורחבות כולל מצב אדפטיבי"""
+        # טעינת הגדרות קיימות
+        current_settings = self.load_settings()
+        
+        # עדכון הגדרות אוברלי לפי סוג הטאב
+        if tab_type == "all":
+            current_settings["all_files_overlay_path"] = overlay_settings['overlay_path']
+            current_settings["all_files_overlay_light_path"] = overlay_settings['light_overlay_path']
+            current_settings["all_adaptive_mode"] = overlay_settings['adaptive_mode']
+        else:  # selected
+            current_settings["selected_files_overlay_path"] = overlay_settings['overlay_path']
+            current_settings["selected_files_overlay_light_path"] = overlay_settings['light_overlay_path']
+            current_settings["selected_adaptive_mode"] = overlay_settings['adaptive_mode']
+            
+        # עדכון הגדרות משותפות
+        current_settings["overlay_width"] = overlay_width
+        current_settings["overlay_height"] = overlay_height
+        current_settings["margin_top"] = margin_top
+        current_settings["margin_right"] = margin_right
+        
+        try:
+            # נסיון לשמור בתיקיית האפליקציה
+            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONFIG_FILE_NAME)
+            with open(config_path, 'w', encoding='utf-8') as file_handler:
+                json.dump(current_settings, file_handler, ensure_ascii=False, indent=2)
+        except Exception as error_msg:
+            try:
+                # אם נכשל, ננסה בתיקיית המשתמש
+                import tempfile
+                config_path = os.path.join(tempfile.gettempdir(), CONFIG_FILE_NAME)
+                with open(config_path, 'w', encoding='utf-8') as file_handler:
+                    json.dump(current_settings, file_handler, ensure_ascii=False, indent=2)
+            except Exception:
+                print(f"לא ניתן לשמור הגדרות: {error_msg}")
 
     def load_settings(self):
         """טעינת הגדרות מקובץ JSON"""
         default_settings = {
             "all_files_overlay_path": "",  # נתיב נפרד לעיבוד כל הקבצים
             "selected_files_overlay_path": "",  # נתיב נפרד לקבצים נבחרים
+            "all_files_overlay_light_path": "",  # אוברלי בהיר לכל הקבצים
+            "selected_files_overlay_light_path": "",  # אוברלי בהיר לקבצים נבחרים
+            "all_adaptive_mode": False,  # מצב אדפטיבי לכל הקבצים
+            "selected_adaptive_mode": False,  # מצב אדפטיבי לקבצים נבחרים
             "overlay_width": 100,
             "overlay_height": 100,
             "margin_top": 10,

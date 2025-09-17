@@ -1,9 +1,13 @@
 {
-  "all_files_overlay_path": "D:/ניסיון/Screenshot_1.jpg",
-  "selected_files_overlay_path": "D:/ניסיון/Screenshot_1.jpg",
-  "overlay_width": 100,
-  "overlay_height": 100,
-  "margin_top": 10,
-  "margin_right": 10,
-  "overlay_path": ""
+  "all_files_overlay_path": "D:/ניסיון/black.jpg",
+  "selected_files_overlay_path": "",
+  "overlay_width": -1,
+  "overlay_height": -1,
+  "margin_top": 5,
+  "margin_right": 5,
+  "overlay_path": "",
+  "all_files_overlay_light_path": "D:/ניסיון/white.png",
+  "selected_files_overlay_light_path": "",
+  "all_adaptive_mode": true,
+  "selected_adaptive_mode": false
 }
