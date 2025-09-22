@@ -136,3 +136,45 @@ export const deleteVacation = async (id) => {
     }
 }
 
+
+export const addlike = async (user_id, vacation_id) =>{
+    try{
+        const response = await fetch(`${API_URL}/api/likes`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ user_id, vacation_id })
+        })
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || "Failed to add like")
+        }
+        return await response.json()
+    }
+    catch(err){
+        console.error(err)
+        throw err
+    }
+}
+
+export const unlike = async (user_id, vacation_id) =>{
+    try{
+        const response = await fetch(`${API_URL}/api/likes`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ user_id, vacation_id })
+        })
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || "Failed to unlike")
+        }
+        return await response.json()
+    }
+    catch(err){
+        console.error(err)
+        throw err
+    }
+}

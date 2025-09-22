@@ -22,6 +22,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { useVacation } from '../Contexts/vacationContext';
+import { likesContext, useLike } from '../Contexts/likescontext';
 import { useUser } from '../Contexts/userContext';
 import styles from './vacationCard.module.css';
 
@@ -50,6 +51,7 @@ const ExpandMore = styled((props) => {
 }));
 
 export function vacationscard() {
+    const {addlike, unlike} = useLike()
     const {user} = useUser()
     const { getVacation, deleteVacation } = useVacation();
     const [vacations, setVacations] = useState([]);
@@ -78,13 +80,42 @@ export function vacationscard() {
         }));
     };
 
-    const handleLikeClick = (index) => {
-        setLikedCards(prev => ({
-            ...prev,
-            [index]: !prev[index]
-        }));
-    };
 
+    const handleLikeToggle = async (vacation_id) => {
+        if (!user || !user.user_id) {
+            alert("need to sign in to like")
+            return
+        }
+        
+        const isCurrentlyLiked = likedCards[vacation_id]
+        
+        try {
+            let response
+            if (isCurrentlyLiked && user && user.user_id) {
+                // אם כבר לייק, אז אנלייק
+                response = await unlike(user.user_id, vacation_id)
+                if (response) {
+                    setLikedCards(prev => ({
+                        ...prev,
+                        [vacation_id]: false
+                    }))
+                }
+            } else if (user && user.user_id) {
+                // אם לא לייק, אז לייק
+                response = await addlike(user.user_id, vacation_id)
+                if (response) {
+                    setLikedCards(prev => ({
+                        ...prev,
+                        [vacation_id]: true
+                    }))
+                }
+            }
+            return response
+        } catch (err) {
+            console.error(err)
+            throw err
+        }
+    }
     const handledelete = async (id, vacationName) => {
         // אישור מחיקה
         const confirmDelete = window.confirm(`האם אתה בטוח שברצונך למחוק את החופשה "${vacationName}"?`);
@@ -194,16 +225,16 @@ export function vacationscard() {
                         </div>
                     </CardContent>
                     <CardActions disableSpacing>
-                        <IconButton 
-                            aria-label="add to favorites"
-                            onClick={() => handleLikeClick(index)}
-                            sx={{ color: likedCards[index] ? red[500] : 'inherit' }}
-                        >
-                            <FavoriteIcon />
-                        </IconButton>
-                        <IconButton aria-label="share">
-                            <ShareIcon />
-                        </IconButton>
+                    <IconButton 
+                        aria-label="add to favorites"
+                        onClick={() => handleLikeToggle(vacation.vacation_id)}
+                        sx={{ color: likedCards[vacation.vacation_id] ? red[500] : 'inherit' }}
+                    >
+                        <FavoriteIcon />
+                    </IconButton>
+                    <IconButton aria-label="share">
+                        <ShareIcon />
+                    </IconButton>
                         {user && user.role_id === 1 && (
                             <Button
                                 variant="outlined"
